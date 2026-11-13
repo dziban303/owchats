@@ -274,6 +274,9 @@
                     <div class="col-md-4">
                         <div class="alert alert-info">
                             <h5>How to get your chat data</h5>
+                            <p id="open-webui-export-shortcut" hidden>
+                                <a class="alert-link" target="_blank" rel="noopener noreferrer">Open Open WebUI’s export settings</a>
+                            </p>
                             <ol>
                                 <li>Open your OpenWebUI instance</li>
                                 <li>Go to "Admin Panel" > "Settings" tab</li>
@@ -693,6 +696,7 @@
                 // The setting can still be used if browser storage is unavailable.
             }
             input.value = openWebUIBase;
+            updateOpenWebUIExportShortcut();
             input.addEventListener('input', () => input.removeAttribute('aria-invalid'));
             document.getElementById('open-webui-settings').addEventListener('submit', event => {
                 event.preventDefault();
@@ -706,6 +710,7 @@
                 }
                 input.removeAttribute('aria-invalid');
                 input.value = openWebUIBase;
+                updateOpenWebUIExportShortcut();
                 document.querySelectorAll('a.open-webui-link').forEach(updateOpenWebUILink);
                 try {
                     if (openWebUIBase) localStorage.setItem(openWebUIStorageKey, openWebUIBase);
@@ -715,6 +720,17 @@
                     status.textContent = openWebUIBase ? 'Base URL set for this page.' : 'Open WebUI links are hidden on this page.';
                 }
             });
+        }
+
+        function updateOpenWebUIExportShortcut() {
+            const shortcut = document.getElementById('open-webui-export-shortcut');
+            const link = shortcut.querySelector('a');
+            shortcut.hidden = !openWebUIBase;
+            if (openWebUIBase) {
+                link.href = new URL('?settings=admin:db', openWebUIBase).href;
+            } else {
+                link.removeAttribute('href');
+            }
         }
 
         function createOpenWebUILink(chatId, label, messageId) {

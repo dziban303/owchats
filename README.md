@@ -8,8 +8,9 @@ This is a simple tool to analyze chats from OpenWebUI. It provides a user-friend
 
 There are two ways to use this tool:
 
-1. **Upload your own chat data**: Simply drag and drop your JSON file onto the upload area
-2. **Use the default sample file**. Click **Use Sample Data** to load [five synthetic chats](all-chats.json).
+1. **Locally with your own chat data**: Download the [chat-analyzer.html](chat-analyzer.html) file, double click it to open it in your browser. Simply drag and drop your JSON file onto the upload area, or click it to open the file selector.
+2. **Use the Github-hosted copy**: The page is [hosted on Github](https://dziban303.github.io/owchats/chat-analyzer.html) for ease of use. I'd recommend using a local copy though.
+3. **Use the default sample file**. Click **Use Sample Data** to load [five synthetic chats](all-chats.json).
 
 The sample loads when the analyzer is served over HTTP, including on GitHub Pages. To try it locally, run `python -m http.server 8000` from the repository root and open [the analyzer](http://localhost:8000/chat-analyzer.html).
 
@@ -18,7 +19,7 @@ The sample loads when the analyzer is served over HTTP, including on GitHub Page
 To open exported chats on your own instance, expand **Open WebUI links** and save your instance’s base URL, such as `https://chat.example.com`. The analyzer remembers it in your browser and shows links in the Chat List, conversation viewer, and Sources views. Message links use the message ID to jump to the corresponding turn on Open WebUI versions that support it.
 
 1. Open your OpenWebUI instance.
-2. Go to "Admin Panel" > "Settings" tab.
+2. Go to "Admin Panel" > "Settings" tab. (If you're running OpenWebUI on the same computer, try http://localhost:3000/?settings=admin:db)
 3. Select the option "Export all chats".
 
 This will download a file named `all-chats-export-<id>.json` to your computer.
@@ -29,6 +30,7 @@ This will download a file named `all-chats-export-<id>.json` to your computer.
 - Ability to filter chats by date, model, and user
 - Detailed message view with source references when available
 - Search functionality to find specific chats
+- Sources and tags functionality
 - File upload to analyze your own JSON data
 
 ## Screenshots
