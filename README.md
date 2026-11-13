@@ -15,6 +15,8 @@ The sample loads when the analyzer is served over HTTP, including on GitHub Page
 
 ## Downloading chats from OpenWebUI
 
+To open exported chats on your own instance, expand **Open WebUI links** and save your instance’s base URL, such as `https://chat.example.com`. The analyzer remembers it in your browser and shows links in the Chat List, conversation viewer, and Sources views. Message links use the message ID to jump to the corresponding turn on Open WebUI versions that support it.
+
 1. Open your OpenWebUI instance.
 2. Go to "Admin Panel" > "Settings" tab.
 3. Select the option "Export all chats".

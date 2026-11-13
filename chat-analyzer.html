@@ -180,6 +180,9 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+        .open-webui-link[hidden] {
+            display: none !important;
+        }
         .chat-list-tags {
             min-width: 6rem;
             overflow-wrap: anywhere;
@@ -235,6 +238,17 @@
                 </select>
             </div>
         </header>
+        <details class="mb-4">
+            <summary>Open WebUI links</summary>
+            <form id="open-webui-settings" class="mt-2" novalidate>
+                <label for="open-webui-url" class="form-label">Open WebUI base URL</label>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <input id="open-webui-url" class="form-control w-auto" type="url" size="32" placeholder="https://chat.example.com" aria-describedby="open-webui-status">
+                    <button type="submit" class="btn btn-outline-primary">Save</button>
+                </div>
+                <div id="open-webui-status" class="form-text" role="status">Leave blank to hide links.</div>
+            </form>
+        </details>
         
         <div id="file-upload-section" class="card mb-4">
             <div class="card-header">
@@ -602,6 +616,9 @@
         let messageModal;
         let fileUploaded = false;
         let fileName = '';
+        const openWebUIStorageKey = 'owchats-open-webui-url';
+        const openWebUILinkTargets = new WeakMap();
+        let openWebUIBase = '';
 
         // Chart instances to allow destruction before recreating
         let modelChart = null;
@@ -613,6 +630,7 @@
         // Initialize the application
         document.addEventListener('DOMContentLoaded', async () => {
             setupTheme();
+            setupOpenWebUISettings();
             setupChatListControls();
             setupSourcesControls();
             setupEventListeners();
@@ -622,6 +640,78 @@
             // Initialize modal
             messageModal = new bootstrap.Modal(document.getElementById('message-modal'));
         });
+
+        function normalizeOpenWebUIBase(value) {
+            if (!value.trim()) return '';
+            const url = new URL(value.trim());
+            if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || url.search || url.hash) {
+                throw new Error('Invalid Open WebUI base URL');
+            }
+            return url.href.replace(/\/+$/, '') + '/';
+        }
+
+        function setupOpenWebUISettings() {
+            const input = document.getElementById('open-webui-url');
+            const status = document.getElementById('open-webui-status');
+            try {
+                openWebUIBase = normalizeOpenWebUIBase(localStorage.getItem(openWebUIStorageKey) ?? '');
+            } catch {
+                // The setting can still be used if browser storage is unavailable.
+            }
+            input.value = openWebUIBase;
+            input.addEventListener('input', () => input.removeAttribute('aria-invalid'));
+            document.getElementById('open-webui-settings').addEventListener('submit', event => {
+                event.preventDefault();
+                try {
+                    openWebUIBase = normalizeOpenWebUIBase(input.value);
+                } catch {
+                    input.setAttribute('aria-invalid', 'true');
+                    status.textContent = 'Enter an HTTP or HTTPS base URL without credentials, a query, or a fragment.';
+                    input.focus();
+                    return;
+                }
+                input.removeAttribute('aria-invalid');
+                input.value = openWebUIBase;
+                document.querySelectorAll('a.open-webui-link').forEach(updateOpenWebUILink);
+                try {
+                    if (openWebUIBase) localStorage.setItem(openWebUIStorageKey, openWebUIBase);
+                    else localStorage.removeItem(openWebUIStorageKey);
+                    status.textContent = openWebUIBase ? 'Base URL saved in this browser.' : 'Open WebUI links are hidden.';
+                } catch {
+                    status.textContent = openWebUIBase ? 'Base URL set for this page.' : 'Open WebUI links are hidden on this page.';
+                }
+            });
+        }
+
+        function createOpenWebUILink(chatId, label, messageId) {
+            if (typeof chatId !== 'string' || !chatId.trim() || chatId === '.' || chatId === '..') return null;
+            const link = document.createElement('a');
+            link.className = 'open-webui-link small';
+            link.textContent = label;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            openWebUILinkTargets.set(link, { chatId, messageId });
+            updateOpenWebUILink(link);
+            return link;
+        }
+
+        function updateOpenWebUILink(link) {
+            const target = openWebUILinkTargets.get(link);
+            if (!target) return;
+            link.hidden = !openWebUIBase;
+            if (!openWebUIBase) {
+                link.removeAttribute('href');
+                return;
+            }
+            const url = new URL('c/' + encodeURIComponent(target.chatId), openWebUIBase);
+            if (target.messageId) url.searchParams.set('message', target.messageId);
+            link.href = url.href;
+        }
+
+        function getMessageId(chat, message) {
+            if (message.id) return message.id;
+            return Object.entries(chat.chat?.history?.messages ?? {}).find(([, entry]) => entry === message)?.[0];
+        }
 
         function setupTheme() {
             const themeSelect = document.getElementById('theme-select');
@@ -1084,7 +1174,7 @@
                         sourceTypes.set(type, (sourceTypes.get(type) ?? 0) + 1);
                         if (!sources.has(key)) {
                             const chat = type === 'chat' ? chatsById.get(source.id) : undefined;
-                            sources.set(key, { name, type, chat, count: 0, citations: new Map() });
+                            sources.set(key, { id: source.id, name, type, chat, count: 0, citations: new Map() });
                         }
                         const entry = sources.get(key);
                         entry.count++;
@@ -1168,6 +1258,12 @@
                     button.style.overflowWrap = 'anywhere';
                     button.addEventListener('click', () => displayMessages(chat, message, () => displaySourceCitations(source)));
                     group.append(button);
+                    const messageId = getMessageId(chat, message);
+                    const link = messageId && createOpenWebUILink(chat.id || chat.chat?.id, 'Open message in Open WebUI', messageId);
+                    if (link) {
+                        link.classList.add('me-2');
+                        group.append(link);
+                    }
                 }
                 list.append(group);
             }
@@ -1194,6 +1290,13 @@
                 openChat.textContent = 'Open conversation';
                 openChat.addEventListener('click', () => displayMessages(source.chat));
                 details.append(openChat);
+            }
+            if (source.type === 'chat') {
+                const link = createOpenWebUILink(source.id, 'Open in Open WebUI');
+                if (link) {
+                    link.classList.add('ms-2');
+                    details.append(link);
+                }
             }
 
             return details;
@@ -1523,6 +1626,11 @@
                 if (matches.has(chat)) appendMessageMatch(row.cells[1], chat, matches.get(chat));
                 row.querySelector('.view-chat').addEventListener('click', () => displayChatDetails(chat));
                 row.querySelector('.view-messages').addEventListener('click', () => displayMessages(chat));
+                const link = createOpenWebUILink(chat.id || chat.chat?.id, 'Open in Open WebUI');
+                if (link) {
+                    link.classList.add('d-block', 'mt-1');
+                    row.lastElementChild.append(link);
+                }
                 chatList.appendChild(row);
             }
 
@@ -1643,6 +1751,12 @@
             title.className = 'mb-3';
             title.textContent = chat.title || 'Untitled Chat';
             messageContainer.appendChild(title);
+            const chatId = chat.id || chat.chat?.id;
+            const chatLink = createOpenWebUILink(chatId, 'Open chat in Open WebUI');
+            if (chatLink) {
+                chatLink.classList.add('d-inline-block', 'mb-3');
+                messageContainer.append(chatLink);
+            }
             
             const messages = target ? getConversationMessages(chat) : (
                 chat.chat?.messages ?? getConversationMessages(chat)
@@ -1673,6 +1787,9 @@
                     roleSpan.className = 'fw-bold mb-1';
                     roleSpan.textContent = message.role === 'user' ? 'User' : 'Assistant';
                     messageDiv.appendChild(roleSpan);
+                    const messageId = getMessageId(chat, message);
+                    const link = messageId && createOpenWebUILink(chatId, 'Open message in Open WebUI', messageId);
+                    if (link) roleSpan.append(' ', link);
                     
                     const contentDiv = document.createElement('div');
                     // Parse markdown in message content
