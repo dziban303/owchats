@@ -1,0 +1,675 @@
+[
+  {
+    "id": "487f8d9d-117e-4c0a-a391-000000000001",
+    "user_id": "c99e6a03-3a4a-4193-96da-5d2bd4b23708",
+    "title": "Weekend plan for the Maple Street tool library",
+    "chat": {
+      "id": "487f8d9d-117e-4c0a-a391-000000000001",
+      "title": "Weekend plan for the Maple Street tool library",
+      "models": [
+        "qwen2.5:7b"
+      ],
+      "params": {},
+      "history": {
+        "messages": {
+          "487f8d9d-117e-4c0a-a391-000000000001-m1": {
+            "id": "487f8d9d-117e-4c0a-a391-000000000001-m1",
+            "parentId": null,
+            "childrenIds": [
+              "487f8d9d-117e-4c0a-a391-000000000001-m2"
+            ],
+            "role": "user",
+            "content": "We have a repair clinic on Saturday. What should the opening volunteers do before we unlock the doors?",
+            "timestamp": 1787061600,
+            "models": [
+              "qwen2.5:7b"
+            ]
+          },
+          "487f8d9d-117e-4c0a-a391-000000000001-m2": {
+            "id": "487f8d9d-117e-4c0a-a391-000000000001-m2",
+            "parentId": "487f8d9d-117e-4c0a-a391-000000000001-m1",
+            "childrenIds": [
+              "487f8d9d-117e-4c0a-a391-000000000001-m3"
+            ],
+            "role": "assistant",
+            "content": "Use this opening checklist:\n\n1. Count the safety glasses and check them for damage.\n2. Set up sign-in sheets and a clearly marked returns area.\n3. Walk the benches and set aside any damaged equipment.",
+            "timestamp": 1787061644,
+            "model": "qwen2.5:7b",
+            "modelName": "qwen2.5:7b",
+            "modelIdx": 0,
+            "done": true,
+            "sources": [
+              {
+                "source": {
+                  "id": "sample-volunteer-handbook",
+                  "name": "volunteer-handbook.pdf",
+                  "type": "file"
+                },
+                "document": [
+                  "Opening shift: check safety gear, set out sign-in sheets, and record any damaged equipment."
+                ],
+                "metadata": [
+                  {
+                    "page": 2
+                  }
+                ]
+              }
+            ]
+          },
+          "487f8d9d-117e-4c0a-a391-000000000001-m3": {
+            "id": "487f8d9d-117e-4c0a-a391-000000000001-m3",
+            "parentId": "487f8d9d-117e-4c0a-a391-000000000001-m2",
+            "childrenIds": [
+              "487f8d9d-117e-4c0a-a391-000000000001-m4"
+            ],
+            "role": "user",
+            "content": "Can you fit that into a 30-minute window?",
+            "timestamp": 1787061688,
+            "models": [
+              "qwen2.5:7b"
+            ]
+          },
+          "487f8d9d-117e-4c0a-a391-000000000001-m4": {
+            "id": "487f8d9d-117e-4c0a-a391-000000000001-m4",
+            "parentId": "487f8d9d-117e-4c0a-a391-000000000001-m3",
+            "childrenIds": [],
+            "role": "assistant",
+            "content": "Yes. Spend the first 10 minutes on safety gear, the next 10 on sign-in and returns, and the final 10 on checking benches. Ask one volunteer to handle sign-in while another does the bench check.",
+            "timestamp": 1787061732,
+            "model": "qwen2.5:7b",
+            "modelName": "qwen2.5:7b",
+            "modelIdx": 0,
+            "done": true
+          }
+        },
+        "currentId": "487f8d9d-117e-4c0a-a391-000000000001-m4"
+      },
+      "messages": [
+        {
+          "id": "487f8d9d-117e-4c0a-a391-000000000001-m1",
+          "parentId": null,
+          "childrenIds": [
+            "487f8d9d-117e-4c0a-a391-000000000001-m2"
+          ],
+          "role": "user",
+          "content": "We have a repair clinic on Saturday. What should the opening volunteers do before we unlock the doors?",
+          "timestamp": 1787061600,
+          "models": [
+            "qwen2.5:7b"
+          ]
+        },
+        {
+          "id": "487f8d9d-117e-4c0a-a391-000000000001-m2",
+          "parentId": "487f8d9d-117e-4c0a-a391-000000000001-m1",
+          "childrenIds": [
+            "487f8d9d-117e-4c0a-a391-000000000001-m3"
+          ],
+          "role": "assistant",
+          "content": "Use this opening checklist:\n\n1. Count the safety glasses and check them for damage.\n2. Set up sign-in sheets and a clearly marked returns area.\n3. Walk the benches and set aside any damaged equipment.",
+          "timestamp": 1787061644,
+          "model": "qwen2.5:7b",
+          "modelName": "qwen2.5:7b",
+          "modelIdx": 0,
+          "done": true,
+          "sources": [
+            {
+              "source": {
+                "id": "sample-volunteer-handbook",
+                "name": "volunteer-handbook.pdf",
+                "type": "file"
+              },
+              "document": [
+                "Opening shift: check safety gear, set out sign-in sheets, and record any damaged equipment."
+              ],
+              "metadata": [
+                {
+                  "page": 2
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "487f8d9d-117e-4c0a-a391-000000000001-m3",
+          "parentId": "487f8d9d-117e-4c0a-a391-000000000001-m2",
+          "childrenIds": [
+            "487f8d9d-117e-4c0a-a391-000000000001-m4"
+          ],
+          "role": "user",
+          "content": "Can you fit that into a 30-minute window?",
+          "timestamp": 1787061688,
+          "models": [
+            "qwen2.5:7b"
+          ]
+        },
+        {
+          "id": "487f8d9d-117e-4c0a-a391-000000000001-m4",
+          "parentId": "487f8d9d-117e-4c0a-a391-000000000001-m3",
+          "childrenIds": [],
+          "role": "assistant",
+          "content": "Yes. Spend the first 10 minutes on safety gear, the next 10 on sign-in and returns, and the final 10 on checking benches. Ask one volunteer to handle sign-in while another does the bench check.",
+          "timestamp": 1787061732,
+          "model": "qwen2.5:7b",
+          "modelName": "qwen2.5:7b",
+          "modelIdx": 0,
+          "done": true
+        }
+      ],
+      "tags": [],
+      "timestamp": 1787061600,
+      "files": []
+    },
+    "updated_at": 1787061732,
+    "created_at": 1787061600,
+    "share_id": null,
+    "archived": false,
+    "pinned": false,
+    "meta": {
+      "tags": [
+        "community",
+        "planning"
+      ]
+    },
+    "folder_id": null
+  },
+  {
+    "id": "487f8d9d-117e-4c0a-a391-000000000002",
+    "user_id": "c99e6a03-3a4a-4193-96da-5d2bd4b23708",
+    "title": "Draft a volunteer reminder",
+    "chat": {
+      "id": "487f8d9d-117e-4c0a-a391-000000000002",
+      "title": "Draft a volunteer reminder",
+      "models": [
+        "llama3.1:8b"
+      ],
+      "params": {},
+      "history": {
+        "messages": {
+          "487f8d9d-117e-4c0a-a391-000000000002-m1": {
+            "id": "487f8d9d-117e-4c0a-a391-000000000002-m1",
+            "parentId": null,
+            "childrenIds": [
+              "487f8d9d-117e-4c0a-a391-000000000002-m2"
+            ],
+            "role": "user",
+            "content": "Write a friendly reminder for the Saturday volunteers based on our opening plan.",
+            "timestamp": 1788447600,
+            "models": [
+              "llama3.1:8b"
+            ]
+          },
+          "487f8d9d-117e-4c0a-a391-000000000002-m2": {
+            "id": "487f8d9d-117e-4c0a-a391-000000000002-m2",
+            "parentId": "487f8d9d-117e-4c0a-a391-000000000002-m1",
+            "childrenIds": [],
+            "role": "assistant",
+            "content": "**Subject: See you Saturday at the tool library**\n\nHi everyone! Please arrive 30 minutes before we open. We’ll check the safety gear, set up sign-in and returns, and take a quick look around the benches together. Thanks for helping neighbors get their repairs done!",
+            "timestamp": 1788447644,
+            "model": "llama3.1:8b",
+            "modelName": "llama3.1:8b",
+            "modelIdx": 0,
+            "done": true,
+            "sources": [
+              {
+                "source": {
+                  "id": "487f8d9d-117e-4c0a-a391-000000000001",
+                  "name": "Weekend plan for the Maple Street tool library",
+                  "type": "chat"
+                },
+                "document": [
+                  "Spend the first 10 minutes on safety gear, the next 10 on sign-in and returns, and the final 10 on checking benches."
+                ],
+                "metadata": [
+                  {
+                    "chat_id": "487f8d9d-117e-4c0a-a391-000000000001"
+                  }
+                ]
+              },
+              {
+                "source": {
+                  "id": "sample-volunteer-handbook",
+                  "name": "volunteer-handbook.pdf",
+                  "type": "file"
+                },
+                "document": [
+                  "Opening shift: check safety gear, set out sign-in sheets, and record any damaged equipment."
+                ],
+                "metadata": [
+                  {
+                    "page": 2
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "currentId": "487f8d9d-117e-4c0a-a391-000000000002-m2"
+      },
+      "messages": [
+        {
+          "id": "487f8d9d-117e-4c0a-a391-000000000002-m1",
+          "parentId": null,
+          "childrenIds": [
+            "487f8d9d-117e-4c0a-a391-000000000002-m2"
+          ],
+          "role": "user",
+          "content": "Write a friendly reminder for the Saturday volunteers based on our opening plan.",
+          "timestamp": 1788447600,
+          "models": [
+            "llama3.1:8b"
+          ]
+        },
+        {
+          "id": "487f8d9d-117e-4c0a-a391-000000000002-m2",
+          "parentId": "487f8d9d-117e-4c0a-a391-000000000002-m1",
+          "childrenIds": [],
+          "role": "assistant",
+          "content": "**Subject: See you Saturday at the tool library**\n\nHi everyone! Please arrive 30 minutes before we open. We’ll check the safety gear, set up sign-in and returns, and take a quick look around the benches together. Thanks for helping neighbors get their repairs done!",
+          "timestamp": 1788447644,
+          "model": "llama3.1:8b",
+          "modelName": "llama3.1:8b",
+          "modelIdx": 0,
+          "done": true,
+          "sources": [
+            {
+              "source": {
+                "id": "487f8d9d-117e-4c0a-a391-000000000001",
+                "name": "Weekend plan for the Maple Street tool library",
+                "type": "chat"
+              },
+              "document": [
+                "Spend the first 10 minutes on safety gear, the next 10 on sign-in and returns, and the final 10 on checking benches."
+              ],
+              "metadata": [
+                {
+                  "chat_id": "487f8d9d-117e-4c0a-a391-000000000001"
+                }
+              ]
+            },
+            {
+              "source": {
+                "id": "sample-volunteer-handbook",
+                "name": "volunteer-handbook.pdf",
+                "type": "file"
+              },
+              "document": [
+                "Opening shift: check safety gear, set out sign-in sheets, and record any damaged equipment."
+              ],
+              "metadata": [
+                {
+                  "page": 2
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "tags": [],
+      "timestamp": 1788447600,
+      "files": []
+    },
+    "updated_at": 1788447644,
+    "created_at": 1788447600,
+    "share_id": null,
+    "archived": false,
+    "pinned": false,
+    "meta": {
+      "tags": [
+        "community",
+        "writing"
+      ]
+    },
+    "folder_id": null
+  },
+  {
+    "id": "487f8d9d-117e-4c0a-a391-000000000003",
+    "user_id": "c99e6a03-3a4a-4193-96da-5d2bd4b23708",
+    "title": "Can you help me plan a two-hour beginner workshop for the neighborhood tool library? We have six workbenches, twelve participants, a limited supply of safety glasses, and a mix of people who have never handled tools and people who already do small repairs at home. Please give me a schedule and a short materials checklist.",
+    "chat": {
+      "id": "487f8d9d-117e-4c0a-a391-000000000003",
+      "title": "Can you help me plan a two-hour beginner workshop for the neighborhood tool library? We have six workbenches, twelve participants, a limited supply of safety glasses, and a mix of people who have never handled tools and people who already do small repairs at home. Please give me a schedule and a short materials checklist.",
+      "models": [
+        "qwen2.5:7b"
+      ],
+      "params": {},
+      "history": {
+        "messages": {
+          "487f8d9d-117e-4c0a-a391-000000000003-m1": {
+            "id": "487f8d9d-117e-4c0a-a391-000000000003-m1",
+            "parentId": null,
+            "childrenIds": [
+              "487f8d9d-117e-4c0a-a391-000000000003-m2"
+            ],
+            "role": "user",
+            "content": "Can you help me plan a two-hour beginner workshop for the neighborhood tool library? We have six workbenches, twelve participants, a limited supply of safety glasses, and a mix of people who have never handled tools and people who already do small repairs at home. Please give me a schedule and a short materials checklist.",
+            "timestamp": 1792603800,
+            "models": [
+              "qwen2.5:7b"
+            ]
+          },
+          "487f8d9d-117e-4c0a-a391-000000000003-m2": {
+            "id": "487f8d9d-117e-4c0a-a391-000000000003-m2",
+            "parentId": "487f8d9d-117e-4c0a-a391-000000000003-m1",
+            "childrenIds": [],
+            "role": "assistant",
+            "content": "Pair up participants so every bench has two people. Start with a safety demo before anyone picks up a tool.\n\n| Time | Activity |\n| --- | --- |\n| 0:00–0:20 | Welcome, safety, and tool demonstration |\n| 0:20–1:30 | Paired practice, switching roles halfway through |\n| 1:30–2:00 | Questions, cleanup, and tool return |\n\n**Materials:** safety glasses, scrap wood, clamps, screwdrivers, and a sign-in sheet. Confirm there are enough glasses before the hands-on portion.",
+            "timestamp": 1792603844,
+            "model": "qwen2.5:7b",
+            "modelName": "qwen2.5:7b",
+            "modelIdx": 0,
+            "done": true,
+            "sources": [
+              {
+                "source": {
+                  "id": "sample-volunteer-handbook",
+                  "name": "volunteer-handbook.pdf",
+                  "type": "file"
+                },
+                "document": [
+                  "Opening shift: check safety gear, set out sign-in sheets, and record any damaged equipment."
+                ],
+                "metadata": [
+                  {
+                    "page": 2
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "currentId": "487f8d9d-117e-4c0a-a391-000000000003-m2"
+      },
+      "messages": [
+        {
+          "id": "487f8d9d-117e-4c0a-a391-000000000003-m1",
+          "parentId": null,
+          "childrenIds": [
+            "487f8d9d-117e-4c0a-a391-000000000003-m2"
+          ],
+          "role": "user",
+          "content": "Can you help me plan a two-hour beginner workshop for the neighborhood tool library? We have six workbenches, twelve participants, a limited supply of safety glasses, and a mix of people who have never handled tools and people who already do small repairs at home. Please give me a schedule and a short materials checklist.",
+          "timestamp": 1792603800,
+          "models": [
+            "qwen2.5:7b"
+          ]
+        },
+        {
+          "id": "487f8d9d-117e-4c0a-a391-000000000003-m2",
+          "parentId": "487f8d9d-117e-4c0a-a391-000000000003-m1",
+          "childrenIds": [],
+          "role": "assistant",
+          "content": "Pair up participants so every bench has two people. Start with a safety demo before anyone picks up a tool.\n\n| Time | Activity |\n| --- | --- |\n| 0:00–0:20 | Welcome, safety, and tool demonstration |\n| 0:20–1:30 | Paired practice, switching roles halfway through |\n| 1:30–2:00 | Questions, cleanup, and tool return |\n\n**Materials:** safety glasses, scrap wood, clamps, screwdrivers, and a sign-in sheet. Confirm there are enough glasses before the hands-on portion.",
+          "timestamp": 1792603844,
+          "model": "qwen2.5:7b",
+          "modelName": "qwen2.5:7b",
+          "modelIdx": 0,
+          "done": true,
+          "sources": [
+            {
+              "source": {
+                "id": "sample-volunteer-handbook",
+                "name": "volunteer-handbook.pdf",
+                "type": "file"
+              },
+              "document": [
+                "Opening shift: check safety gear, set out sign-in sheets, and record any damaged equipment."
+              ],
+              "metadata": [
+                {
+                  "page": 2
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "tags": [],
+      "timestamp": 1792603800,
+      "files": []
+    },
+    "updated_at": 1792603844,
+    "created_at": 1792603800,
+    "share_id": null,
+    "archived": false,
+    "pinned": false,
+    "meta": {
+      "tags": [
+        "community",
+        "planning",
+        "workshops"
+      ]
+    },
+    "folder_id": null
+  },
+  {
+    "id": "487f8d9d-117e-4c0a-a391-000000000004",
+    "user_id": "e2db74e0-2c7e-49cf-a25e-5fbb2a4a44f1",
+    "title": "Monthly checkout summary",
+    "chat": {
+      "id": "487f8d9d-117e-4c0a-a391-000000000004",
+      "title": "Monthly checkout summary",
+      "models": [
+        "mistral:7b"
+      ],
+      "params": {},
+      "history": {
+        "messages": {
+          "487f8d9d-117e-4c0a-a391-000000000004-m1": {
+            "id": "487f8d9d-117e-4c0a-a391-000000000004-m1",
+            "parentId": null,
+            "childrenIds": [
+              "487f8d9d-117e-4c0a-a391-000000000004-m2"
+            ],
+            "role": "user",
+            "content": "Summarize the October inventory checkout numbers and suggest one improvement for our next beginner workshop.",
+            "timestamp": 1794312000,
+            "models": [
+              "mistral:7b"
+            ]
+          },
+          "487f8d9d-117e-4c0a-a391-000000000004-m2": {
+            "id": "487f8d9d-117e-4c0a-a391-000000000004-m2",
+            "parentId": "487f8d9d-117e-4c0a-a391-000000000004-m1",
+            "childrenIds": [],
+            "role": "assistant",
+            "content": "October had **42 checkouts**. Hand tools led with 24, followed by garden tools with 12 and power tools with 6. For the next beginner workshop, set aside a dedicated set of hand tools at each bench so pairs can start without waiting.",
+            "timestamp": 1794312044,
+            "model": "mistral:7b",
+            "modelName": "mistral:7b",
+            "modelIdx": 0,
+            "done": true,
+            "sources": [
+              {
+                "source": {
+                  "id": "sample-checkout-summary",
+                  "name": "october-checkouts.csv",
+                  "type": "file"
+                },
+                "document": [
+                  "Category,Checkouts\nHand tools,24\nGarden tools,12\nPower tools,6"
+                ],
+                "metadata": [
+                  {
+                    "row": 1
+                  }
+                ]
+              },
+              {
+                "source": {
+                  "id": "487f8d9d-117e-4c0a-a391-000000000003",
+                  "name": "Can you help me plan a two-hour beginner workshop for the neighborhood tool library? We have six workbenches, twelve participants, a limited supply of safety glasses, and a mix of people who have never handled tools and people who already do small repairs at home. Please give me a schedule and a short materials checklist.",
+                  "type": "chat"
+                },
+                "document": [
+                  "Pair up participants so every bench has two people."
+                ],
+                "metadata": [
+                  {
+                    "chat_id": "487f8d9d-117e-4c0a-a391-000000000003"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "currentId": "487f8d9d-117e-4c0a-a391-000000000004-m2"
+      },
+      "messages": [
+        {
+          "id": "487f8d9d-117e-4c0a-a391-000000000004-m1",
+          "parentId": null,
+          "childrenIds": [
+            "487f8d9d-117e-4c0a-a391-000000000004-m2"
+          ],
+          "role": "user",
+          "content": "Summarize the October inventory checkout numbers and suggest one improvement for our next beginner workshop.",
+          "timestamp": 1794312000,
+          "models": [
+            "mistral:7b"
+          ]
+        },
+        {
+          "id": "487f8d9d-117e-4c0a-a391-000000000004-m2",
+          "parentId": "487f8d9d-117e-4c0a-a391-000000000004-m1",
+          "childrenIds": [],
+          "role": "assistant",
+          "content": "October had **42 checkouts**. Hand tools led with 24, followed by garden tools with 12 and power tools with 6. For the next beginner workshop, set aside a dedicated set of hand tools at each bench so pairs can start without waiting.",
+          "timestamp": 1794312044,
+          "model": "mistral:7b",
+          "modelName": "mistral:7b",
+          "modelIdx": 0,
+          "done": true,
+          "sources": [
+            {
+              "source": {
+                "id": "sample-checkout-summary",
+                "name": "october-checkouts.csv",
+                "type": "file"
+              },
+              "document": [
+                "Category,Checkouts\nHand tools,24\nGarden tools,12\nPower tools,6"
+              ],
+              "metadata": [
+                {
+                  "row": 1
+                }
+              ]
+            },
+            {
+              "source": {
+                "id": "487f8d9d-117e-4c0a-a391-000000000003",
+                "name": "Can you help me plan a two-hour beginner workshop for the neighborhood tool library? We have six workbenches, twelve participants, a limited supply of safety glasses, and a mix of people who have never handled tools and people who already do small repairs at home. Please give me a schedule and a short materials checklist.",
+                "type": "chat"
+              },
+              "document": [
+                "Pair up participants so every bench has two people."
+              ],
+              "metadata": [
+                {
+                  "chat_id": "487f8d9d-117e-4c0a-a391-000000000003"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "tags": [],
+      "timestamp": 1794312000,
+      "files": []
+    },
+    "updated_at": 1794312044,
+    "created_at": 1794312000,
+    "share_id": null,
+    "archived": false,
+    "pinned": false,
+    "meta": {
+      "tags": [
+        "reporting",
+        "community"
+      ]
+    },
+    "folder_id": null
+  },
+  {
+    "id": "487f8d9d-117e-4c0a-a391-000000000005",
+    "user_id": "e2db74e0-2c7e-49cf-a25e-5fbb2a4a44f1",
+    "title": "How do I keep basil fresh for the week?",
+    "chat": {
+      "id": "487f8d9d-117e-4c0a-a391-000000000005",
+      "title": "How do I keep basil fresh for the week?",
+      "models": [
+        "llama3.1:8b"
+      ],
+      "params": {},
+      "history": {
+        "messages": {
+          "487f8d9d-117e-4c0a-a391-000000000005-m1": {
+            "id": "487f8d9d-117e-4c0a-a391-000000000005-m1",
+            "parentId": null,
+            "childrenIds": [
+              "487f8d9d-117e-4c0a-a391-000000000005-m2"
+            ],
+            "role": "user",
+            "content": "I bought a bunch of basil for dinner and only used half. How should I store the rest?",
+            "timestamp": 1794510000,
+            "models": [
+              "llama3.1:8b"
+            ]
+          },
+          "487f8d9d-117e-4c0a-a391-000000000005-m2": {
+            "id": "487f8d9d-117e-4c0a-a391-000000000005-m2",
+            "parentId": "487f8d9d-117e-4c0a-a391-000000000005-m1",
+            "childrenIds": [],
+            "role": "assistant",
+            "content": "Trim the stems and stand the basil in a glass with a little water. Cover it loosely with a bag and leave it on the counter away from direct sun. Change the water every day or two. If you won’t use it soon, freeze chopped leaves in olive oil in an ice cube tray.",
+            "timestamp": 1794510044,
+            "model": "llama3.1:8b",
+            "modelName": "llama3.1:8b",
+            "modelIdx": 0,
+            "done": true
+          }
+        },
+        "currentId": "487f8d9d-117e-4c0a-a391-000000000005-m2"
+      },
+      "messages": [
+        {
+          "id": "487f8d9d-117e-4c0a-a391-000000000005-m1",
+          "parentId": null,
+          "childrenIds": [
+            "487f8d9d-117e-4c0a-a391-000000000005-m2"
+          ],
+          "role": "user",
+          "content": "I bought a bunch of basil for dinner and only used half. How should I store the rest?",
+          "timestamp": 1794510000,
+          "models": [
+            "llama3.1:8b"
+          ]
+        },
+        {
+          "id": "487f8d9d-117e-4c0a-a391-000000000005-m2",
+          "parentId": "487f8d9d-117e-4c0a-a391-000000000005-m1",
+          "childrenIds": [],
+          "role": "assistant",
+          "content": "Trim the stems and stand the basil in a glass with a little water. Cover it loosely with a bag and leave it on the counter away from direct sun. Change the water every day or two. If you won’t use it soon, freeze chopped leaves in olive oil in an ice cube tray.",
+          "timestamp": 1794510044,
+          "model": "llama3.1:8b",
+          "modelName": "llama3.1:8b",
+          "modelIdx": 0,
+          "done": true
+        }
+      ],
+      "tags": [],
+      "timestamp": 1794510000,
+      "files": []
+    },
+    "updated_at": 1794510044,
+    "created_at": 1794510000,
+    "share_id": null,
+    "archived": false,
+    "pinned": false,
+    "meta": {
+      "tags": []
+    },
+    "folder_id": null
+  }
+]

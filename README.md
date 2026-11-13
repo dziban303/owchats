@@ -9,7 +9,9 @@ This is a simple tool to analyze chats from OpenWebUI. It provides a user-friend
 There are two ways to use this tool:
 
 1. **Upload your own chat data**: Simply drag and drop your JSON file onto the upload area
-2. **Use the default sample file**: Click the "Use Sample Data" button to analyze the included all-chats.json file
+2. **Use the default sample file**. Click **Use Sample Data** to load [five synthetic chats](all-chats.json).
+
+The sample loads when the analyzer is served over HTTP, including on GitHub Pages. To try it locally, run `python -m http.server 8000` from the repository root and open [the analyzer](http://localhost:8000/chat-analyzer.html).
 
 ## Downloading chats from OpenWebUI
 
@@ -31,11 +33,21 @@ This will download a file named `all-chats-export-<id>.json` to your computer.
 
 ![Upload your JSON file](public/assets/image.png)
 
+![Dark Mode](public/assets/image-4.png)
+
 ![Dashboard 1](public/assets/image-1.png)
+
+![Dashboard 1 Dark](public/assets/image-5.png)
 
 ![Dashboard 2](public/assets/image-2.png)
 
+![Dashboard 2 Dark](public/assets/image-6.png)
+
 ![Messages](public/assets/image-3.png)
+
+![Messages Dark](public/assets/image-7.png)
+
+![Sources Dark](public/assets/image-8.png)
 
 
 
@@ -129,6 +141,7 @@ Each chat in the OpenWebUI export JSON file follows this structure:
 ```
 
 Key elements in each chat:
+
 - Basic metadata: `id`, `user_id`, `title`, timestamps
 - Messages: Array of user and assistant messages with their content
 - Message relationships: Parent-child relationships between messages
