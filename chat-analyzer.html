@@ -392,6 +392,7 @@
             <div class="nav nav-tabs mb-4" role="tablist" aria-label="Analysis views">
                 <button id="dashboard-tab" class="nav-link active" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#dashboard-panel" aria-controls="dashboard-panel" aria-selected="true">Dashboard</button>
                 <button id="sources-tab" class="nav-link" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#sources-panel" aria-controls="sources-panel" aria-selected="false">Sources</button>
+                <button id="tags-tab" class="nav-link" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#tags-panel" aria-controls="tags-panel" aria-selected="false">Tags</button>
             </div>
             <div class="tab-content">
             <section id="dashboard-panel" class="tab-pane active" role="tabpanel" aria-labelledby="dashboard-tab" tabindex="0">
@@ -458,9 +459,12 @@
             </div>
 
             <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Tag Frequency (Top 10)</h5>
-                    <small class="text-body-secondary">Click a bar to require that tag.</small>
+                <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <div>
+                        <h5 class="mb-0">Tag Frequency (Top 10)</h5>
+                        <small class="text-body-secondary">Click a bar to require that tag.</small>
+                    </div>
+                    <button id="view-all-tags" type="button" class="btn btn-sm btn-outline-primary">View all tags</button>
                 </div>
                 <div class="card-body">
                     <p id="tags-empty" class="text-body-secondary mb-0" hidden>No tagged chats match the filters.</p>
@@ -474,7 +478,7 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
-                            <h5 class="mb-0">Chat List</h5>
+                            <h5 id="chat-list-heading" class="mb-0" tabindex="-1">Chat List</h5>
                             <div class="d-flex flex-wrap align-items-center gap-2">
                                 <input type="search" id="search-chat" class="form-control w-auto" placeholder="Search chats..." aria-label="Search chats">
                                 <label class="form-check mb-0">
@@ -575,6 +579,28 @@
                     </div>
                 </div>
             </section>
+            <section id="tags-panel" class="tab-pane" role="tabpanel" aria-labelledby="tags-tab" tabindex="0">
+                <div class="card">
+                    <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <h5 class="mb-0">Tags in Matching Chats</h5>
+                        <input id="search-tags" class="form-control w-auto" type="search" placeholder="Search tags..." aria-label="Search tags">
+                    </div>
+                    <div class="card-body">
+                        <p id="tags-count" class="text-body-secondary small" role="status"></p>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col"><button type="button" class="sort-button btn btn-sm border-0 p-0 text-reset fw-bold" data-tag-sort="name">Tag <span class="sort-indicator" aria-hidden="true"></span></button></th>
+                                        <th scope="col" aria-sort="descending"><button type="button" class="sort-button btn btn-sm border-0 p-0 text-reset fw-bold" data-tag-sort="count">Chats <span class="sort-indicator" aria-hidden="true"></span></button></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tags-list"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
             </div>
         </div>
 
@@ -613,6 +639,9 @@
         let messageSearchCache = new WeakMap();
         let sourceSortKey = 'count';
         let sourceSortDirection = -1;
+        let tagCounts = [];
+        let tagSortKey = 'count';
+        let tagSortDirection = -1;
         let messageModal;
         let fileUploaded = false;
         let fileName = '';
@@ -633,6 +662,7 @@
             setupOpenWebUISettings();
             setupChatListControls();
             setupSourcesControls();
+            setupTagsControls();
             setupEventListeners();
             setupFileUpload();
             setupDefaultFileButton();
@@ -1357,14 +1387,16 @@
                     counts.set(tag, (counts.get(tag) ?? 0) + 1);
                 }
             }
+            tagCounts = [...counts].sort(([a, countA], [b, countB]) =>
+                countB - countA || chatCollator.compare(a, b)
+            );
+            renderTagsList();
             const container = document.getElementById('tags-chart-container');
             container.hidden = !counts.size;
             document.getElementById('tags-empty').hidden = !!counts.size;
             if (!counts.size) return;
 
-            const topTags = [...counts].sort(([a, countA], [b, countB]) =>
-                countB - countA || chatCollator.compare(a, b)
-            ).slice(0, 10);
+            const topTags = tagCounts.slice(0, 10);
             tagsChart = new Chart(document.getElementById('tags-chart'), {
                 type: 'bar',
                 data: {
@@ -1386,6 +1418,54 @@
                     maintainAspectRatio: false
                 }
             });
+        }
+
+        function setupTagsControls() {
+            const tab = document.getElementById('tags-tab');
+            document.getElementById('view-all-tags').addEventListener('click', () => {
+                bootstrap.Tab.getOrCreateInstance(tab).show();
+                tab.focus();
+            });
+            document.getElementById('search-tags').addEventListener('input', renderTagsList);
+            const sortButtons = document.querySelectorAll('[data-tag-sort]');
+            sortButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const key = button.dataset.tagSort;
+                    tagSortDirection = key === tagSortKey ? -tagSortDirection : key === 'count' ? -1 : 1;
+                    tagSortKey = key;
+                    setSortIndicator(sortButtons, button, tagSortDirection);
+                    renderTagsList();
+                });
+            });
+        }
+
+        function renderTagsList() {
+            const query = document.getElementById('search-tags').value.trim().toLowerCase();
+            const matching = tagCounts.filter(([tag]) => tag.toLowerCase().includes(query));
+            matching.sort(([a, countA], [b, countB]) => tagSortDirection * (tagSortKey === 'count'
+                ? countA - countB
+                : chatCollator.compare(a, b)));
+            const rows = document.createDocumentFragment();
+            for (const [tag, count] of matching) {
+                const row = document.createElement('tr');
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'btn btn-link text-start p-0';
+                button.textContent = tag;
+                button.style.overflowWrap = 'anywhere';
+                button.addEventListener('click', () => {
+                    bootstrap.Tab.getOrCreateInstance(document.getElementById('dashboard-tab')).show();
+                    addRequiredTag(tag);
+                    document.getElementById('chat-list-heading').focus();
+                });
+                row.insertCell().append(button);
+                row.insertCell().textContent = count;
+                rows.append(row);
+            }
+            document.getElementById('tags-list').replaceChildren(rows);
+            document.getElementById('tags-count').textContent = matching.length
+                ? `${matching.length} of ${tagCounts.length} tags`
+                : 'No tags match the current filters and search.';
         }
 
         // Populate filter dropdowns
