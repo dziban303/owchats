@@ -1,8 +1,10 @@
-# OpenWebUI Chats Analyzer
+# **OWChats** - OpenWebUI Chats Analyzer
 
 ## Overview
 
 This is a simple tool to analyze chats from OpenWebUI. It provides a user-friendly interface to visualize and understand chat data.
+
+# ➣ [Click here to use the online version](https://dziban303.github.io/owchats/chat-analyzer.html)
 
 ## Getting Started
 
