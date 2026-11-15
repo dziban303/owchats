@@ -3,15 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenWebUI Chat Analyzer</title>
+    <title>OWChats</title>
     <link rel="icon" href="public/assets/analyzer-favicon.ico" sizes="16x16 32x32 48x48">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@catppuccin/palette@1.8.0/css/catppuccin.css" integrity="sha384-b7uvCdLy67+m4YsgrCx3Ku4dc6cOCIrzwISz2intwiF86ybWDJDMSkcMkh0TqqCR" crossorigin="anonymous">
     <script>
         const themeStorageKey = 'owchats-theme';
         const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
+        const catppuccinFlavors = new Set(['latte', 'frappe', 'macchiato', 'mocha']);
+        const themeColors = ['base', 'mantle', 'surface0', 'surface1', 'text', 'subtext0', 'blue', 'mauve', 'green', 'teal', 'yellow', 'red'];
+        const themeRgbColors = ['base', 'text', 'blue', 'mauve'];
         let themePreference = 'system';
         try {
             const savedTheme = localStorage.getItem(themeStorageKey);
-            if (savedTheme === 'light' || savedTheme === 'dark') {
+            if (savedTheme === 'light' || savedTheme === 'dark' || catppuccinFlavors.has(savedTheme)) {
                 themePreference = savedTheme;
             }
         } catch {
@@ -19,9 +23,30 @@
         }
 
         function applyTheme() {
-            document.documentElement.dataset.bsTheme = themePreference === 'system'
-                ? (systemTheme.matches ? 'dark' : 'light')
-                : themePreference;
+            const root = document.documentElement;
+            const flavor = catppuccinFlavors.has(themePreference) ? themePreference : null;
+            root.dataset.bsTheme = flavor ? (flavor === 'latte' ? 'light' : 'dark')
+                : themePreference === 'system' ? (systemTheme.matches ? 'dark' : 'light') : themePreference;
+
+            const styles = getComputedStyle(root);
+            const palette = new Map();
+            if (flavor && styles.getPropertyValue(`--ctp-${flavor}-base`).trim()) {
+                for (const color of themeColors) {
+                    palette.set(color, styles.getPropertyValue(`--ctp-${flavor}-${color}`).trim());
+                }
+                // Bootstrap expects comma-separated channels for its rgb/rgba variables.
+                for (const color of themeRgbColors) {
+                    const rgb = styles.getPropertyValue(`--ctp-${flavor}-${color}-rgb`).trim();
+                    palette.set(color + '-rgb', rgb.split(/\s+/).join(', '));
+                }
+                root.dataset.catppuccin = flavor;
+            } else {
+                delete root.dataset.catppuccin;
+            }
+            for (const color of [...themeColors, ...themeRgbColors.map(color => color + '-rgb')]) {
+                if (palette.has(color)) root.style.setProperty('--theme-' + color, palette.get(color));
+                else root.style.removeProperty('--theme-' + color);
+            }
         }
 
         applyTheme();
@@ -30,6 +55,80 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@4.0.0/marked.min.js"></script>
     <style>
+        :root[data-catppuccin] {
+            --bs-body-bg: var(--theme-base);
+            --bs-body-bg-rgb: var(--theme-base-rgb);
+            --bs-body-color: var(--theme-text);
+            --bs-body-color-rgb: var(--theme-text-rgb);
+            --bs-emphasis-color: var(--theme-text);
+            --bs-emphasis-color-rgb: var(--theme-text-rgb);
+            --bs-secondary-color: var(--theme-subtext0);
+            --bs-secondary-bg: var(--theme-surface0);
+            --bs-tertiary-bg: var(--theme-mantle);
+            --bs-border-color: var(--theme-surface1);
+            --bs-border-color-translucent: var(--theme-surface1);
+            --bs-primary: var(--theme-blue);
+            --bs-primary-rgb: var(--theme-blue-rgb);
+            --bs-primary-text-emphasis: color-mix(in srgb, var(--theme-blue), var(--theme-text) 38%);
+            --bs-primary-bg-subtle: color-mix(in srgb, var(--theme-blue) 13%, var(--theme-base));
+            --bs-info-text-emphasis: color-mix(in srgb, var(--theme-teal), var(--theme-text) 65%);
+            --bs-info-bg-subtle: color-mix(in srgb, var(--theme-teal) 13%, var(--theme-base));
+            --bs-info-border-subtle: var(--theme-surface1);
+            --bs-success-text-emphasis: color-mix(in srgb, var(--theme-green), var(--theme-text) 65%);
+            --bs-success-bg-subtle: color-mix(in srgb, var(--theme-green) 13%, var(--theme-base));
+            --bs-success-border-subtle: var(--theme-surface1);
+            --bs-warning-text-emphasis: color-mix(in srgb, var(--theme-yellow), var(--theme-text) 70%);
+            --bs-warning-bg-subtle: color-mix(in srgb, var(--theme-yellow) 13%, var(--theme-base));
+            --bs-danger-text-emphasis: color-mix(in srgb, var(--theme-red), var(--theme-text) 55%);
+            --bs-danger-bg-subtle: color-mix(in srgb, var(--theme-red) 13%, var(--theme-base));
+            --bs-danger-border-subtle: var(--theme-surface1);
+            --bs-link-color: var(--theme-blue);
+            --bs-link-color-rgb: var(--theme-blue-rgb);
+            --bs-link-hover-color: var(--theme-mauve);
+            --bs-link-hover-color-rgb: var(--theme-mauve-rgb);
+            --theme-action: color-mix(in srgb, var(--theme-blue), var(--theme-text) 24%);
+            --theme-action-hover: color-mix(in srgb, var(--theme-blue), var(--theme-text) 40%);
+        }
+        [data-catppuccin] .card {
+            --bs-card-cap-bg: var(--theme-mantle);
+        }
+        [data-catppuccin] .btn-primary {
+            --bs-btn-color: var(--theme-base);
+            --bs-btn-bg: var(--theme-action);
+            --bs-btn-border-color: var(--theme-action);
+            --bs-btn-hover-color: var(--theme-base);
+            --bs-btn-hover-bg: var(--theme-action-hover);
+            --bs-btn-hover-border-color: var(--theme-action-hover);
+            --bs-btn-active-color: var(--bs-btn-hover-color);
+            --bs-btn-active-bg: var(--bs-btn-hover-bg);
+            --bs-btn-active-border-color: var(--bs-btn-hover-border-color);
+        }
+        [data-catppuccin] :is(.btn-outline-primary, .btn-outline-secondary) {
+            --bs-btn-color: var(--bs-primary-text-emphasis);
+            --bs-btn-border-color: var(--theme-surface1);
+            --bs-btn-hover-color: var(--theme-text);
+            --bs-btn-hover-bg: var(--theme-surface0);
+            --bs-btn-hover-border-color: var(--theme-action);
+            --bs-btn-active-color: var(--bs-btn-hover-color);
+            --bs-btn-active-bg: var(--bs-btn-hover-bg);
+            --bs-btn-active-border-color: var(--bs-btn-hover-border-color);
+            --bs-btn-disabled-color: var(--theme-subtext0);
+            --bs-btn-disabled-border-color: var(--theme-surface1);
+        }
+        [data-catppuccin] :is(.form-select, .form-control, .form-check-input):focus {
+            border-color: var(--theme-action);
+            box-shadow: 0 0 0 .25rem rgba(var(--theme-blue-rgb), .25);
+        }
+        [data-catppuccin] .form-check-input:checked,
+        [data-catppuccin] .form-check-input:indeterminate {
+            background-color: color-mix(in srgb, var(--theme-blue) 50%, #182335);
+            border-color: var(--theme-action);
+        }
+        [data-catppuccin] .pagination {
+            --bs-pagination-active-bg: var(--theme-action);
+            --bs-pagination-active-border-color: var(--theme-action);
+            --bs-pagination-active-color: var(--theme-base);
+        }
         body {
             padding: 20px;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -69,6 +168,16 @@
             --activity-high: #2b5997;
             --activity-peak: #3067ad;
             --activity-ink: #fff;
+        }
+        [data-catppuccin][data-bs-theme] .activity-grid {
+            --activity-low: color-mix(in srgb, var(--theme-blue) 12%, var(--theme-base));
+            --activity-medium: color-mix(in srgb, var(--theme-blue) 24%, var(--theme-base));
+            --activity-high: color-mix(in srgb, var(--theme-blue) 30%, var(--theme-base));
+            --activity-peak: var(--theme-action);
+            --activity-ink: var(--theme-text);
+        }
+        [data-catppuccin] .activity-grid [data-activity-level="4"] {
+            color: var(--theme-base);
         }
         .activity-grid th {
             padding-inline: .2rem;
@@ -365,11 +474,11 @@
         th[aria-sort="descending"] .sort-indicator::before {
             content: "▼";
         }
-        [data-bs-theme="dark"] .btn-outline-primary {
+        [data-bs-theme="dark"]:not([data-catppuccin]) .btn-outline-primary {
             --bs-btn-color: var(--bs-primary-text-emphasis);
             --bs-btn-border-color: var(--bs-primary-text-emphasis);
         }
-        [data-bs-theme="dark"] .btn-outline-secondary {
+        [data-bs-theme="dark"]:not([data-catppuccin]) .btn-outline-secondary {
             --bs-btn-color: var(--bs-secondary-color);
             --bs-btn-border-color: var(--bs-secondary-color);
         }
@@ -380,15 +489,27 @@
         <header class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
             <div class="d-flex align-items-center gap-2">
                 <img src="public/assets/analyzer-logo.png" width="44" height="44" alt="">
-                <h1 class="mb-0">OpenWebUI Chat Analyzer</h1>
+                <div>
+                    <h1 class="mb-0">OWChats</h1>
+                    <p class="mb-0 small fst-italic text-body-secondary">OpenWebUI Chat Analyzer</p>
+                </div>
             </div>
-            <div class="d-flex align-items-center gap-2">
-                <label for="theme-select">Theme</label>
-                <select id="theme-select" class="form-select form-select-sm w-auto">
-                    <option value="system">System</option>
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                </select>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <a class="btn btn-sm btn-outline-secondary" href="https://github.com/dziban303/owchats" target="_blank" rel="noopener noreferrer">GitHub repository</a>
+                <div class="d-flex align-items-center gap-2">
+                    <label for="theme-select">Theme</label>
+                    <select id="theme-select" class="form-select form-select-sm w-auto">
+                        <option value="system">System</option>
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                        <optgroup label="Catppuccin">
+                            <option value="latte">Latte</option>
+                            <option value="frappe">Frappé</option>
+                            <option value="macchiato">Macchiato</option>
+                            <option value="mocha">Mocha</option>
+                        </optgroup>
+                    </select>
+                </div>
             </div>
         </header>
         <details class="mb-4">
@@ -455,8 +576,9 @@
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="card">
-                        <div class="card-header">
-                            <h5>Data Overview</h5>
+                        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <h5 class="mb-0">Data Overview</h5>
+                            <button id="export-report" type="button" class="btn btn-sm btn-outline-primary" disabled>Export analysis report</button>
                         </div>
                         <div class="card-body">
                             <div class="row">
@@ -549,6 +671,7 @@
                 <button id="dashboard-tab" class="nav-link active" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#dashboard-panel" aria-controls="dashboard-panel" aria-selected="true">Dashboard</button>
                 <button id="sources-tab" class="nav-link" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#sources-panel" aria-controls="sources-panel" aria-selected="false">Sources</button>
                 <button id="tags-tab" class="nav-link" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#tags-panel" aria-controls="tags-panel" aria-selected="false">Tags</button>
+                <button id="cleanup-tab" class="nav-link" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#cleanup-panel" aria-controls="cleanup-panel" aria-selected="false">Cleanup</button>
             </div>
             <div class="tab-content">
             <section id="dashboard-panel" class="tab-pane active" role="tabpanel" aria-labelledby="dashboard-tab" tabindex="0">
@@ -807,6 +930,44 @@
                     </div>
                 </div>
             </section>
+            <section id="cleanup-panel" class="tab-pane" role="tabpanel" aria-labelledby="cleanup-tab" tabindex="0">
+                <div class="card">
+                    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <h5 id="cleanup-heading" class="mb-0">Chat Cleanup</h5>
+                        <div class="d-flex align-items-center gap-2">
+                            <label for="cleanup-filter">Reason</label>
+                            <select id="cleanup-filter" class="form-select form-select-sm w-auto">
+                                <option value="all">All reasons</option>
+                                <option value="empty">Empty chats</option>
+                                <option value="unanswered">Prompts without replies</option>
+                                <option value="duplicate">Exact duplicates</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="small text-body-secondary mb-2">Review candidates in the full export. Check the chats you want to include in an export. Selections are shared with the Chat List.</p>
+                        <p id="cleanup-count" class="small text-body-secondary" role="status"></p>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <button id="cleanup-export-selected" type="button" class="btn btn-sm btn-outline-primary" disabled>Export selected (0)</button>
+                            <button id="cleanup-clear-selection" type="button" class="btn btn-sm btn-outline-secondary" hidden>Clear selection</button>
+                        </div>
+                        <div id="cleanup-results" class="table-responsive" hidden>
+                            <table class="table table-striped table-hover align-middle" aria-labelledby="cleanup-heading">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Export</th>
+                                        <th scope="col">Chat</th>
+                                        <th scope="col">Reason</th>
+                                        <th scope="col">Created</th>
+                                        <th scope="col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cleanup-list"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
             </div>
         </div>
 
@@ -831,7 +992,8 @@
         // Main data object
         let chatData = [];
         let filteredData = [];
-        let chatFilter = { chats: [], startTimestamp: -Infinity };
+        let chatFilter = { chats: [], startTimestamp: -Infinity, dropdowns: [] };
+        const dashboardFilterFields = [['date-filter', 'Date'], ['model-filter', 'Model'], ['user-filter', 'User']];
         let activityPeriod = null;
         let replyModelFilter = null;
         let modelComparison = { chats: [], includeMessage: null, stats: new Map() };
@@ -846,6 +1008,8 @@
         const requiredTags = new Set();
         let untaggedOnly = false;
         const selectedChats = new Set();
+        let cleanupCandidates = null;
+        const cleanupCheckboxes = new Map();
         let matchingChats = [];
         let pageChats = [];
         let messageSearchCache = new WeakMap();
@@ -873,9 +1037,11 @@
             setupTheme();
             setupOpenWebUISettings();
             setupChatListControls();
+            document.getElementById('export-report').addEventListener('click', exportAnalysisReport);
             setupModelAnalytics();
             setupSourcesControls();
             setupTagsControls();
+            setupCleanupControls();
             setupEventListeners();
             setupFileUpload();
             setupDefaultFileButton();
@@ -991,6 +1157,34 @@
             updateChartTheme();
         }
 
+        const chartPalettes = {
+            'model-chart': { accents: ['blue'], rgb: ['54, 162, 235'], opacity: .6 },
+            'time-chart': { accents: ['teal'], rgb: ['75, 192, 192'], opacity: .2 },
+            'message-chart': { accents: ['peach', 'teal'], rgb: ['255, 159, 64', '75, 192, 192'], opacity: .6 },
+            'sources-chart': {
+                accents: ['red', 'blue', 'yellow', 'teal', 'mauve'],
+                rgb: ['255, 99, 132', '54, 162, 235', '255, 206, 86', '75, 192, 192', '153, 102, 255'],
+                opacity: .6
+            },
+            'tags-chart': { accents: ['blue'], rgb: ['54, 162, 235'], opacity: .6 }
+        };
+
+        function getChartColors(id, styles = getComputedStyle(document.documentElement)) {
+            const { accents, rgb, opacity } = chartPalettes[id];
+            const flavor = document.documentElement.dataset.catppuccin;
+            const colors = flavor ? accents.map((accent, index) => {
+                const value = styles.getPropertyValue(`--ctp-${flavor}-${accent}-rgb`).trim();
+                return value ? value.split(/\s+/).join(', ') : rgb[index];
+            }) : rgb;
+            const fills = colors.map(color => `rgba(${color}, ${opacity})`);
+            const strokes = colors.map(color => `rgb(${color})`);
+            return {
+                backgroundColor: fills.length === 1 ? fills[0] : fills,
+                borderColor: id === 'sources-chart' ? (flavor ? styles.getPropertyValue('--theme-base').trim() : undefined)
+                    : strokes.length === 1 ? strokes[0] : strokes
+            };
+        }
+
         function updateChartTheme() {
             if (typeof Chart === 'undefined') return;
 
@@ -1003,6 +1197,7 @@
             for (const chart of [modelChart, timeChart, messageChart, sourcesChart, tagsChart]) {
                 if (!chart) continue;
 
+                Object.assign(chart.data.datasets[0], getChartColors(chart.canvas.id, styles));
                 chart.options.plugins.legend.labels.color = textColor;
                 for (const axis of Object.values(chart.options.scales)) {
                     axis.ticks.color = textColor;
@@ -1154,16 +1349,24 @@
 
         // Process and display the data
         function processData(data) {
-            chatFilter = { chats: data, startTimestamp: -Infinity };
+            chatFilter = { chats: data, startTimestamp: -Infinity, dropdowns: [] };
             activityPeriod = null;
             replyModelFilter = null;
             selectedChats.clear();
+            cleanupCandidates = null;
+            cleanupCheckboxes.clear();
+            document.getElementById('cleanup-filter').value = 'all';
+            document.getElementById('cleanup-list').replaceChildren();
+            document.getElementById('cleanup-results').hidden = true;
+            document.getElementById('cleanup-count').textContent = '';
             messageSearchCache = new WeakMap();
 
             displayOverviewStats(data);
             populateFilters(data);
             renderActivityHeatmaps(data);
             renderFilteredResults(true);
+            if (document.getElementById('cleanup-tab').classList.contains('active')) renderCleanup();
+            document.getElementById('export-report').disabled = false;
         }
 
         // Display overview statistics
@@ -1233,8 +1436,7 @@
                     datasets: [{
                         label: 'Number of Chats',
                         data: Object.values(modelCounts),
-                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
+                        ...getChartColors('model-chart'),
                         borderWidth: 1
                     }]
                 },
@@ -1390,8 +1592,7 @@
                     datasets: [{
                         label: 'Number of Chats',
                         data: sortedMonths.map(month => chatsByMonth[month]),
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
+                        ...getChartColors('time-chart'),
                         borderWidth: 2,
                         tension: 0.1
                     }]
@@ -1517,7 +1718,7 @@
             document.getElementById('activity-hours').replaceChildren(table);
         }
 
-        function renderActivityCalendar(days, year) {
+        function getActivityWeeks(days, year) {
             const firstDay = Date.UTC(year, 0, 1);
             const end = Date.UTC(year + 1, 0, 1);
             const daysSinceMonday = (new Date(firstDay).getUTCDay() + 6) % 7;
@@ -1534,7 +1735,11 @@
                 });
                 weeks.push(week);
             }
+            return { weeks, maximum };
+        }
 
+        function renderActivityCalendar(days, year) {
+            const { weeks, maximum } = getActivityWeeks(days, year);
             const table = document.createElement('table');
             table.className = 'activity-grid activity-calendar';
             table.setAttribute('aria-labelledby', 'activity-calendar-heading');
@@ -1687,14 +1892,7 @@
                     labels: ['User Messages', 'Assistant Messages'],
                     datasets: [{
                         data: [messageDistribution.user, messageDistribution.assistant],
-                        backgroundColor: [
-                            'rgba(255, 159, 64, 0.6)',
-                            'rgba(75, 192, 192, 0.6)'
-                        ],
-                        borderColor: [
-                            'rgba(255, 159, 64, 1)',
-                            'rgba(75, 192, 192, 1)'
-                        ],
+                        ...getChartColors('message-chart'),
                         borderWidth: 1
                     }]
                 },
@@ -1760,13 +1958,7 @@
                     labels: [...sourceTypes.keys()],
                     datasets: [{
                         data: [...sourceTypes.values()],
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.6)',
-                            'rgba(54, 162, 235, 0.6)',
-                            'rgba(255, 206, 86, 0.6)',
-                            'rgba(75, 192, 192, 0.6)',
-                            'rgba(153, 102, 255, 0.6)'
-                        ],
+                        ...getChartColors('sources-chart'),
                         borderWidth: 1
                     }]
                 },
@@ -1942,8 +2134,7 @@
                     datasets: [{
                         label: 'Chats',
                         data: topTags.map(([, count]) => count),
-                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                        borderColor: 'rgb(54, 162, 235)',
+                        ...getChartColors('tags-chart'),
                         borderWidth: 1
                     }]
                 },
@@ -2087,13 +2278,17 @@
                 displayChatList();
                 event.target.focus();
             });
-            document.getElementById('clear-chat-selection').addEventListener('click', () => {
-                selectedChats.clear();
-                displayChatList();
-            });
-            document.getElementById('export-selected').addEventListener('click', () => {
-                downloadChats(chatData.filter(chat => selectedChats.has(chat)), 'selected-chats.json');
-            });
+            for (const id of ['clear-chat-selection', 'cleanup-clear-selection']) {
+                document.getElementById(id).addEventListener('click', () => {
+                    selectedChats.clear();
+                    displayChatList();
+                });
+            }
+            for (const id of ['export-selected', 'cleanup-export-selected']) {
+                document.getElementById(id).addEventListener('click', () => {
+                    downloadChats(chatData.filter(chat => selectedChats.has(chat)), 'selected-chats.json');
+                });
+            }
             document.getElementById('export-filtered').addEventListener('click', () => {
                 downloadChats(matchingChats, 'filtered-chats.json');
             });
@@ -2128,8 +2323,11 @@
             selectPage.checked = !!pageChats.length && selectedOnPage === pageChats.length;
             selectPage.indeterminate = selectedOnPage > 0 && !selectPage.checked;
             document.getElementById('clear-chat-selection').hidden = !selectedChats.size;
+            document.getElementById('cleanup-clear-selection').hidden = !selectedChats.size;
+            for (const [chat, checkbox] of cleanupCheckboxes) checkbox.checked = selectedChats.has(chat);
             for (const [id, label, count] of [
                 ['export-selected', 'Export selected', selectedChats.size],
+                ['cleanup-export-selected', 'Export selected', selectedChats.size],
                 ['export-filtered', 'Export results', matchingChats.length]
             ]) {
                 const button = document.getElementById(id);
@@ -2140,7 +2338,11 @@
 
         function downloadChats(chats, filename) {
             if (!chats.length) return;
-            const url = URL.createObjectURL(new Blob([JSON.stringify(chats, null, 2)], { type: 'application/json' }));
+            downloadFile(new Blob([JSON.stringify(chats, null, 2)], { type: 'application/json' }), filename);
+        }
+
+        function downloadFile(blob, filename) {
+            const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
             link.download = filename;
@@ -2148,6 +2350,206 @@
             link.click();
             link.remove();
             setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        function appendReportText(parent, tag, content) {
+            const element = parent.ownerDocument.createElement(tag);
+            element.textContent = content;
+            parent.append(element);
+            return element;
+        }
+
+        function appendReportTable(parent, title, columns, rows, { bars = false, heatMaximum = 0 } = {}) {
+            const report = parent.ownerDocument;
+            const group = report.createElement('div');
+            parent.append(group);
+            const label = appendReportText(group, 'h3', title);
+            if (!rows.length) {
+                appendReportText(group, 'p', 'No data in this view.');
+                return;
+            }
+            const scroller = report.createElement('div');
+            scroller.className = 'table-scroll';
+            scroller.tabIndex = 0;
+            scroller.setAttribute('role', 'region');
+            scroller.setAttribute('aria-label', title);
+            group.append(scroller);
+            const table = report.createElement('table');
+            if (heatMaximum) table.className = 'report-heatmap';
+            label.id = 'report-table-' + report.querySelectorAll('table').length;
+            table.setAttribute('aria-labelledby', label.id);
+            scroller.append(table);
+            const header = table.createTHead().insertRow();
+            for (const column of columns) appendReportText(header, 'th', column).scope = 'col';
+            const body = table.createTBody();
+            const barMaximum = bars ? rows.reduce((max, [, value]) => Math.max(max, value), 1) : 1;
+            for (const [name, ...values] of rows) {
+                const row = body.insertRow();
+                appendReportText(row, 'th', name).scope = 'row';
+                for (const value of values) {
+                    const numeric = typeof value === 'number';
+                    const cell = row.insertCell();
+                    cell.textContent = numeric ? activityCountFormat.format(value) : value;
+                    if (!numeric) continue;
+                    cell.classList.add('number');
+                    if (bars && value > 0) {
+                        cell.style.setProperty('--bar-width', value / barMaximum * 100 + '%');
+                        cell.classList.add('report-bar');
+                    }
+                    if (heatMaximum) cell.dataset.level = value ? Math.ceil(4 * Math.sqrt(value / heatMaximum)) : 0;
+                }
+            }
+        }
+
+        function appendReportChart(parent, title, chart, label, unit) {
+            const data = chart.data;
+            const rows = data.labels.map((label, index) => [label, data.datasets[0].data[index]]);
+            appendReportTable(parent, title, [label, unit], rows, { bars: true });
+        }
+
+        function appendReportActivity(section) {
+            const { chats, startTimestamp } = chatFilter;
+            const { hours, days, total } = collectActivity(chats, startTimestamp);
+            if (!total) {
+                appendReportText(section, 'p', 'No dated user messages match the dashboard filters.');
+                return;
+            }
+            const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            appendReportText(section, 'p', 'User messages are grouped by date sent in ' + timeZone
+                + '. The hourly view spans the dashboard date range.');
+            const labels = hours[0].map((_, hour) => String(hour).padStart(2, '0'));
+            const hourly = hours.map((counts, index) => [activityWeekdays[index], ...counts]);
+            appendReportTable(section, 'Messages by weekday and hour', ['Weekday', ...labels], hourly,
+                { heatMaximum: Math.max(...hours.flat()) });
+
+            const year = Number(document.getElementById('activity-year').value);
+            const { weeks, maximum } = getActivityWeeks(days, year);
+            const weekly = [];
+            for (const week of weeks) {
+                const dates = week.filter(Boolean);
+                const count = dates.reduce((sum, { count }) => sum + count, 0);
+                if (!count) continue;
+                const range = activityDateFormat.formatRange(dates[0].day, dates.at(-1).day);
+                weekly.push([range, ...week.map(day => day?.count ?? '—'), activityCountFormat.format(count)]);
+            }
+            appendReportTable(section, 'Daily activity and weekly totals · ' + year,
+                ['Active week', ...activityWeekdays, 'Total'], weekly, { heatMaximum: maximum });
+        }
+
+        function exportAnalysisReport() {
+            const now = new Date();
+            const report = document.implementation.createHTMLDocument('OWChats analysis report');
+            report.documentElement.lang = document.documentElement.lang || 'en';
+            report.head.prepend(Object.assign(report.createElement('meta'), { charset: 'utf-8' }));
+            report.head.append(Object.assign(report.createElement('meta'), {
+                name: 'viewport', content: 'width=device-width, initial-scale=1'
+            }));
+            appendReportText(report.head, 'style', `
+                * { box-sizing: border-box; }
+                body { margin: 0 auto; padding: 2rem 1rem 3rem; max-width: 72rem;
+                    font: 1rem/1.5 system-ui, sans-serif; color: #17263b; background: #fff; }
+                header { border-top: .35rem solid #2461a5; border-bottom: 1px solid #d6e1ed; padding: 1rem 0; }
+                h1, h2, h3 { line-height: 1.2; margin: 0 0 .55em; }
+                h1 { font-size: clamp(1.8rem, 5vw, 2.75rem); }
+                h3 { font-size: 1rem; }
+                p { margin: .35rem 0 .75rem; color: #485971; }
+                section { margin-top: 1.75rem; }
+                dl, .report-columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: 1rem; }
+                dl > div { padding: .75rem 1rem; background: #eef5fd; border: 1px solid #d6e1ed; border-radius: .35rem; }
+                dd { margin: .15rem 0 0; font-size: 1.65rem; font-weight: 650; }
+                .table-scroll { overflow-x: auto; margin-bottom: 1.1rem; }
+                .table-scroll:focus-visible { outline: 2px solid #2461a5; outline-offset: 2px; }
+                table { width: 100%; border-collapse: collapse; font-size: .88rem; text-align: left; }
+                th, td { padding: .35rem .55rem; border-bottom: 1px solid #d6e1ed; overflow-wrap: anywhere; }
+                thead th { color: #314862; background: #eef5fd; white-space: nowrap; }
+                tbody th { font-weight: 500; }
+                .number { text-align: right; font-variant-numeric: tabular-nums; }
+                .report-bar { min-width: 6rem; background: linear-gradient(to right, #cce1fa var(--bar-width), transparent 0); }
+                .report-heatmap th, .report-heatmap td { padding: .24rem .2rem; white-space: nowrap; }
+                .report-heatmap td, .report-heatmap thead th:not(:first-child) { text-align: center; }
+                [data-level="0"] { background: #f5f7fa; }
+                [data-level="1"] { background: #e2edff; }
+                [data-level="2"] { background: #bcd7fc; }
+                [data-level="3"] { background: #8bb9f8; }
+                [data-level="4"] { background: #609bf0; }
+                @media print {
+                    body { padding: 0; font-size: 10pt; print-color-adjust: exact; }
+                    header { break-inside: avoid; }
+                    h2, h3 { break-after: avoid; }
+                    tr { break-inside: avoid; }
+                    .table-scroll { overflow: visible; }
+                    .report-heatmap { font-size: 7pt; }
+                }
+            `);
+
+            const header = report.createElement('header');
+            report.body.append(header);
+            appendReportText(header, 'h1', 'OWChats analysis report');
+            appendReportText(header, 'p', 'Generated ' + now.toLocaleString());
+            const filters = [
+                ...chatFilter.dropdowns.map(([, label]) => label),
+                ...[...requiredTags].map(tag => 'Tag: ' + tag),
+                ...(untaggedOnly ? ['Untagged only'] : [])
+            ];
+            const drillDown = [];
+            if (activityPeriod) drillDown.push('Activity: ' + getActivityPeriodLabel());
+            if (replyModelFilter !== null) drillDown.push('Reply model: ' + getAnalyticsModelLabel(replyModelFilter));
+            appendReportText(header, 'p', 'Dashboard filters · ' + (filters.join(' · ') || 'All chats'));
+            if (drillDown.length) appendReportText(header, 'p', 'Selected drill-down · ' + drillDown.join(' · '));
+
+            const summary = report.createElement('dl');
+            header.append(summary);
+            for (const [label, count] of [
+                ['Imported chats', chatData.length],
+                ['Matching chats', filteredData.length],
+                ['Users in matching chats', new Set(filteredData.map(chat => chat.user_id)).size]
+            ]) {
+                const item = report.createElement('div');
+                summary.append(item);
+                appendReportText(item, 'dt', label);
+                appendReportText(item, 'dd', activityCountFormat.format(count));
+            }
+
+            const overview = report.createElement('section');
+            report.body.append(overview);
+            appendReportText(overview, 'h2', 'Chat overview');
+            appendReportText(overview, 'p', 'Models and timeline use dashboard filters and chat creation dates.');
+            const overviewCharts = report.createElement('div');
+            overviewCharts.className = 'report-columns';
+            overview.append(overviewCharts);
+            appendReportChart(overviewCharts, 'Chats by configured model', modelChart, 'Model', 'Chats');
+            appendReportChart(overviewCharts, 'Chats over time', timeChart, 'Month', 'Chats');
+
+            const activity = report.createElement('section');
+            report.body.append(activity);
+            appendReportText(activity, 'h2', 'Chat activity');
+            appendReportActivity(activity);
+
+            const models = report.createElement('section');
+            report.body.append(models);
+            appendReportText(models, 'h2', 'Model analytics');
+            appendReportText(models, 'p', 'The comparison includes alternate replies and uses the dashboard filters and selected activity period.');
+            const modelRows = [...document.querySelectorAll('#model-analytics tr')]
+                .map(row => [...row.cells].map(cell => cell.textContent));
+            appendReportTable(models, 'Saved assistant replies',
+                ['Model', 'Chats', 'Replies', 'Median chars', 'Replies with sources'], modelRows);
+
+            const details = report.createElement('section');
+            report.body.append(details);
+            appendReportText(details, 'h2', 'Messages, sources and tags');
+            appendReportText(details, 'p', 'These counts use the matching chats. An active calendar selection also scopes messages and sources to its dates.');
+            const detailCharts = report.createElement('div');
+            detailCharts.className = 'report-columns';
+            details.append(detailCharts);
+            appendReportChart(detailCharts, 'Message distribution', messageChart, 'Role', 'Messages');
+            appendReportChart(detailCharts, 'Sources by type', sourcesChart, 'Type', 'References');
+            appendReportTable(details, 'Top 10 referenced sources', ['Source', 'Type', 'References'],
+                referencedSources.slice(0, 10).map(({ name, type, count }) => [name, type, count]));
+            appendReportTable(details, 'Top 10 tags', ['Tag', 'Chats'], tagCounts.slice(0, 10), { bars: true });
+
+            const date = new Date(getActivityDay(now)).toISOString().slice(0, 10);
+            const html = '<!doctype html>\n' + report.documentElement.outerHTML;
+            downloadFile(new Blob([html], { type: 'text/html;charset=utf-8' }), 'owchats-analysis-' + date + '.html');
         }
 
         function getMessageMatch(chat, searchTerm) {
@@ -2404,6 +2806,150 @@
                 currentPath.add(node);
             }
             return { nodes, roots: nodes.filter(node => !node.parent), current, currentPath };
+        }
+
+        function getCleanupSignature(chat, { nodes, roots }) {
+            const { id, title, timestamp, tags, messages, history, ...chatDetails } = chat.chat ?? {};
+            const { messages: storedMessages, currentId, ...historyDetails } = history ?? {};
+            const entries = Object.entries(storedMessages ?? {});
+            const ids = new Map();
+            for (const node of nodes) {
+                if (!node.id) continue;
+                if (ids.has(node.id)) return null;
+                ids.set(node.id, node);
+            }
+            for (const [key, message] of entries) {
+                const node = ids.get(message.id || key);
+                if (!node || (ids.has(key) && ids.get(key) !== node)) return null;
+                ids.set(key, node);
+            }
+
+            // Number messages in branch order so regenerated export IDs have no effect.
+            const positions = new Map();
+            const pending = [...roots].reverse();
+            while (pending.length) {
+                const node = pending.pop();
+                positions.set(node, positions.size);
+                const childOrder = new Map(Array.isArray(node.childIds)
+                    ? node.childIds.map((childId, index) => [ids.get(childId), index]) : []);
+                const children = [...node.children].sort((a, b) =>
+                    (childOrder.get(a) ?? Infinity) - (childOrder.get(b) ?? Infinity));
+                for (let index = children.length - 1; index >= 0; index--) pending.push(children[index]);
+            }
+            if (positions.size !== nodes.length) return null;
+
+            const remap = messageId => ids.has(messageId) ? positions.get(ids.get(messageId)) : messageId;
+            const messageData = ({ id, timestamp, parentId, childrenIds, ...payload }) => ({
+                ...payload,
+                parentId: remap(parentId),
+                childrenIds: Array.isArray(childrenIds) ? childrenIds.map(remap) : childrenIds
+            });
+            const graph = entries.map(([key, message]) => [remap(key), messageData(message)])
+                .sort(([a], [b]) => a - b);
+            const conversation = [
+                chat.user_id, chat.files, chat.attachments, chatDetails, historyDetails,
+                remap(currentId), graph, messages?.map(messageData)
+            ];
+            return JSON.stringify(conversation, (_, value) => {
+                if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
+                return Object.fromEntries(Object.keys(value).sort().map(key => [key, value[key]]));
+            });
+        }
+
+        function findCleanupCandidates(chats) {
+            const candidates = new Map();
+            const copies = new Map();
+            for (const chat of chats) {
+                const tree = getConversationTree(chat);
+                const messages = tree.nodes.map(node => node.message);
+                const reasons = [];
+                if (!messages.length && ![chat.files, chat.attachments, chat.chat?.files, chat.chat?.attachments]
+                    .some(files => files && Object.keys(files).length)) {
+                    reasons.push('empty');
+                }
+                if (messages.some(message => message.role === 'user') && !messages.some(message => message.role === 'assistant')) {
+                    reasons.push('unanswered');
+                }
+                if (reasons.length) candidates.set(chat, { chat, reasons });
+                if (!messages.length) continue;
+                const signature = getCleanupSignature(chat, tree);
+                if (signature === null) continue;
+                if (!copies.has(signature)) copies.set(signature, []);
+                copies.get(signature).push(chat);
+            }
+
+            let number = 0;
+            for (const group of copies.values()) {
+                if (group.length < 2) continue;
+                number++;
+                for (const chat of group) {
+                    const candidate = candidates.get(chat) ?? { chat, reasons: [] };
+                    candidate.reasons.push('duplicate');
+                    candidate.group = { number, count: group.length };
+                    candidates.set(chat, candidate);
+                }
+            }
+            return [...candidates.values()].sort((a, b) => (a.group?.number ?? 0) - (b.group?.number ?? 0));
+        }
+
+        function setupCleanupControls() {
+            document.getElementById('cleanup-tab').addEventListener('shown.bs.tab', renderCleanup);
+            document.getElementById('cleanup-filter').addEventListener('change', renderCleanup);
+        }
+
+        function renderCleanup() {
+            cleanupCandidates ??= findCleanupCandidates(chatData);
+            const filter = document.getElementById('cleanup-filter').value;
+            const matching = cleanupCandidates.filter(candidate => filter === 'all' || candidate.reasons.includes(filter));
+            const count = document.getElementById('cleanup-count');
+            count.textContent = matching.length
+                ? matching.length.toLocaleString() + (matching.length === 1 ? ' chat to review.' : ' chats to review.')
+                : 'No chats match this cleanup filter.';
+            document.getElementById('cleanup-results').hidden = !matching.length;
+            cleanupCheckboxes.clear();
+
+            const rows = document.createDocumentFragment();
+            for (const { chat, reasons, group } of matching) {
+                const row = document.createElement('tr');
+                const title = chat.title || 'Untitled Chat';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'form-check-input';
+                checkbox.setAttribute('aria-label', 'Select chat for export: ' + title);
+                checkbox.addEventListener('change', () => {
+                    setChatSelected(chat, checkbox.checked);
+                    displayChatList();
+                });
+                cleanupCheckboxes.set(chat, checkbox);
+                row.insertCell().append(checkbox);
+                const heading = document.createElement('th');
+                heading.scope = 'row';
+                heading.className = 'text-break';
+                heading.textContent = title;
+                row.append(heading);
+
+                const detail = row.insertCell();
+                for (const reason of reasons) {
+                    const label = document.createElement('div');
+                    if (reason === 'empty') label.textContent = 'No saved messages or attachments';
+                    if (reason === 'unanswered') label.textContent = 'User messages without a saved assistant reply';
+                    if (reason === 'duplicate') label.textContent = `Duplicate group ${group.number} · ${group.count} chats`;
+                    detail.append(label);
+                }
+                const created = new Date(Number(chat.created_at) * 1000);
+                row.insertCell().textContent = chat.created_at && Number.isFinite(created.getTime())
+                    ? created.toLocaleString() : '—';
+                const review = document.createElement('button');
+                review.type = 'button';
+                review.className = 'btn btn-sm btn-outline-secondary';
+                review.textContent = 'Review';
+                review.setAttribute('aria-label', 'Review ' + title);
+                review.addEventListener('click', () => displayMessages(chat));
+                row.insertCell().append(review);
+                rows.append(row);
+            }
+            document.getElementById('cleanup-list').replaceChildren(rows);
+            updateChatSelection();
         }
 
         function renderConversationTree(panel, chat, target) {
@@ -2671,11 +3217,8 @@
                 });
                 container.append(button);
             };
-            for (const [id, label] of [['date-filter', 'Date'], ['model-filter', 'Model'], ['user-filter', 'User']]) {
-                const select = document.getElementById(id);
-                if (select.value !== 'all') {
-                    addChip(`${label}: ${select.selectedOptions[0].textContent}`, () => { select.value = 'all'; });
-                }
+            for (const [select, label] of chatFilter.dropdowns) {
+                addChip(label, () => { select.value = 'all'; });
             }
             for (const tag of requiredTags) addChip(`Tag: ${tag}`, () => requiredTags.delete(tag));
             if (untaggedOnly) addChip('Untagged only', () => { untaggedOnly = false; });
@@ -2749,7 +3292,13 @@
                 });
             }
             
-            chatFilter = { chats: filtered, startTimestamp };
+            const dropdowns = [];
+            for (const [id, label] of dashboardFilterFields) {
+                const select = document.getElementById(id);
+                if (select.value === 'all') continue;
+                dropdowns.push([select, `${label}: ${select.selectedOptions[0].textContent}`]);
+            }
+            chatFilter = { chats: filtered, startTimestamp, dropdowns };
             // Activity dates refer to individual sends, including replies in older chats.
             renderActivityHeatmaps(filtered, startTimestamp);
             renderFilteredResults(true);

@@ -60,7 +60,8 @@
             "id": "487f8d9d-117e-4c0a-a391-000000000001-m3",
             "parentId": "487f8d9d-117e-4c0a-a391-000000000001-m2",
             "childrenIds": [
-              "487f8d9d-117e-4c0a-a391-000000000001-m4"
+              "487f8d9d-117e-4c0a-a391-000000000001-m4",
+              "487f8d9d-117e-4c0a-a391-000000000001-m5"
             ],
             "role": "user",
             "content": "Can you fit that into a 30-minute window?",
@@ -76,6 +77,18 @@
             "role": "assistant",
             "content": "Yes. Spend the first 10 minutes on safety gear, the next 10 on sign-in and returns, and the final 10 on checking benches. Ask one volunteer to handle sign-in while another does the bench check.",
             "timestamp": 1787061732,
+            "model": "qwen2.5:7b",
+            "modelName": "qwen2.5:7b",
+            "modelIdx": 0,
+            "done": true
+          },
+          "487f8d9d-117e-4c0a-a391-000000000001-m5": {
+            "id": "487f8d9d-117e-4c0a-a391-000000000001-m5",
+            "parentId": "487f8d9d-117e-4c0a-a391-000000000001-m3",
+            "childrenIds": [],
+            "role": "assistant",
+            "content": "Run the checks in parallel. One volunteer checks the safety gear and benches while the other sets up sign-in and returns. Use the last five minutes for a joint walk-through and agree which benches to keep closed.",
+            "timestamp": 1787061793,
             "model": "qwen2.5:7b",
             "modelName": "qwen2.5:7b",
             "modelIdx": 0,
@@ -133,7 +146,8 @@
           "id": "487f8d9d-117e-4c0a-a391-000000000001-m3",
           "parentId": "487f8d9d-117e-4c0a-a391-000000000001-m2",
           "childrenIds": [
-            "487f8d9d-117e-4c0a-a391-000000000001-m4"
+            "487f8d9d-117e-4c0a-a391-000000000001-m4",
+            "487f8d9d-117e-4c0a-a391-000000000001-m5"
           ],
           "role": "user",
           "content": "Can you fit that into a 30-minute window?",
@@ -159,7 +173,7 @@
       "timestamp": 1787061600,
       "files": []
     },
-    "updated_at": 1787061732,
+    "updated_at": 1787061793,
     "created_at": 1787061600,
     "share_id": null,
     "archived": false,
@@ -669,6 +683,155 @@
     "pinned": false,
     "meta": {
       "tags": []
+    },
+    "folder_id": null
+  },
+  {
+    "id": "487f8d9d-117e-4c0a-a391-000000000006",
+    "user_id": "c99e6a03-3a4a-4193-96da-5d2bd4b23708",
+    "title": "Draft a volunteer reminder (copy)",
+    "chat": {
+      "id": "487f8d9d-117e-4c0a-a391-000000000006",
+      "title": "Draft a volunteer reminder (copy)",
+      "models": [
+        "llama3.1:8b"
+      ],
+      "params": {},
+      "history": {
+        "messages": {
+          "487f8d9d-117e-4c0a-a391-000000000006-m1": {
+            "id": "487f8d9d-117e-4c0a-a391-000000000006-m1",
+            "parentId": null,
+            "childrenIds": [
+              "487f8d9d-117e-4c0a-a391-000000000006-m2"
+            ],
+            "role": "user",
+            "content": "Write a friendly reminder for the Saturday volunteers based on our opening plan.",
+            "timestamp": 1789052400,
+            "models": [
+              "llama3.1:8b"
+            ]
+          },
+          "487f8d9d-117e-4c0a-a391-000000000006-m2": {
+            "id": "487f8d9d-117e-4c0a-a391-000000000006-m2",
+            "parentId": "487f8d9d-117e-4c0a-a391-000000000006-m1",
+            "childrenIds": [],
+            "role": "assistant",
+            "content": "**Subject: See you Saturday at the tool library**\n\nHi everyone! Please arrive 30 minutes before we open. We’ll check the safety gear, set up sign-in and returns, and take a quick look around the benches together. Thanks for helping neighbors get their repairs done!",
+            "timestamp": 1789052444,
+            "model": "llama3.1:8b",
+            "modelName": "llama3.1:8b",
+            "modelIdx": 0,
+            "done": true,
+            "sources": [
+              {
+                "source": {
+                  "id": "487f8d9d-117e-4c0a-a391-000000000001",
+                  "name": "Weekend plan for the Maple Street tool library",
+                  "type": "chat"
+                },
+                "document": [
+                  "Spend the first 10 minutes on safety gear, the next 10 on sign-in and returns, and the final 10 on checking benches."
+                ],
+                "metadata": [
+                  {
+                    "chat_id": "487f8d9d-117e-4c0a-a391-000000000001"
+                  }
+                ]
+              },
+              {
+                "source": {
+                  "id": "sample-volunteer-handbook",
+                  "name": "volunteer-handbook.pdf",
+                  "type": "file"
+                },
+                "document": [
+                  "Opening shift: check safety gear, set out sign-in sheets, and record any damaged equipment."
+                ],
+                "metadata": [
+                  {
+                    "page": 2
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "currentId": "487f8d9d-117e-4c0a-a391-000000000006-m2"
+      },
+      "messages": [
+        {
+          "id": "487f8d9d-117e-4c0a-a391-000000000006-m1",
+          "parentId": null,
+          "childrenIds": [
+            "487f8d9d-117e-4c0a-a391-000000000006-m2"
+          ],
+          "role": "user",
+          "content": "Write a friendly reminder for the Saturday volunteers based on our opening plan.",
+          "timestamp": 1789052400,
+          "models": [
+            "llama3.1:8b"
+          ]
+        },
+        {
+          "id": "487f8d9d-117e-4c0a-a391-000000000006-m2",
+          "parentId": "487f8d9d-117e-4c0a-a391-000000000006-m1",
+          "childrenIds": [],
+          "role": "assistant",
+          "content": "**Subject: See you Saturday at the tool library**\n\nHi everyone! Please arrive 30 minutes before we open. We’ll check the safety gear, set up sign-in and returns, and take a quick look around the benches together. Thanks for helping neighbors get their repairs done!",
+          "timestamp": 1789052444,
+          "model": "llama3.1:8b",
+          "modelName": "llama3.1:8b",
+          "modelIdx": 0,
+          "done": true,
+          "sources": [
+            {
+              "source": {
+                "id": "487f8d9d-117e-4c0a-a391-000000000001",
+                "name": "Weekend plan for the Maple Street tool library",
+                "type": "chat"
+              },
+              "document": [
+                "Spend the first 10 minutes on safety gear, the next 10 on sign-in and returns, and the final 10 on checking benches."
+              ],
+              "metadata": [
+                {
+                  "chat_id": "487f8d9d-117e-4c0a-a391-000000000001"
+                }
+              ]
+            },
+            {
+              "source": {
+                "id": "sample-volunteer-handbook",
+                "name": "volunteer-handbook.pdf",
+                "type": "file"
+              },
+              "document": [
+                "Opening shift: check safety gear, set out sign-in sheets, and record any damaged equipment."
+              ],
+              "metadata": [
+                {
+                  "page": 2
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "tags": [],
+      "timestamp": 1789052400,
+      "files": []
+    },
+    "updated_at": 1789052444,
+    "created_at": 1789052400,
+    "share_id": null,
+    "archived": false,
+    "pinned": false,
+    "meta": {
+      "tags": [
+        "community",
+        "writing"
+      ]
     },
     "folder_id": null
   }

@@ -1,4 +1,6 @@
-# **OWChats** - OpenWebUI Chats Analyzer
+# OWChats
+
+_OpenWebUI Chat Analyzer_
 
 ## Overview
 
@@ -12,9 +14,12 @@ There are two ways to use this tool:
 
 1. **Locally with your own chat data**: Download the [chat-analyzer.html](chat-analyzer.html) file, double click it to open it in your browser. Simply drag and drop your JSON file onto the upload area, or click it to open the file selector.
 2. **Use the Github-hosted copy**: The page is [hosted on Github](https://dziban303.github.io/owchats/chat-analyzer.html) for ease of use. I'd recommend using a local copy though.
-3. **Use the default sample file**. Click **Use Sample Data** to load [five synthetic chats](all-chats.json).
+3. **Use the default sample file**. Click **Use Sample Data** to load [six synthetic chats](all-chats.json).
 
 The sample loads when the analyzer is served over HTTP, including on GitHub Pages. To try it locally, run `python -m http.server 8000` from the repository root and open [the analyzer](http://localhost:8000/chat-analyzer.html).
+
+- In **Cleanup**, review the duplicate pair **Draft a volunteer reminder** and **Draft a volunteer reminder (copy)**.
+- In the **Chat List**, open **Messages** for **Weekend plan for the Maple Street tool library**, then select **Conversation tree** to compare the two replies to its final prompt.
 
 ## Downloading chats from OpenWebUI
 
@@ -35,9 +40,15 @@ This will download a file named `all-chats-export-<id>.json` to your computer.
 - Ability to filter chats by date, model, and user
 - Detailed message view with source references when available
 - Read-only conversation tree with the saved path and alternate branches. Open a conversation from the Chat List and select **Conversation tree**.
+- Cleanup tab for empty chats, prompts without saved replies, and exact conversation duplicates within the same user's export data. Review the flagged chats and select records to export as JSON.
 - Search functionality to find specific chats
 - Sources and tags functionality
 - File upload to analyze your own JSON data
+- Theme selector with System, Light, Dark, and the four [Catppuccin](https://github.com/catppuccin/palette/blob/main/docs/css.md) flavors
+
+## Export an analysis report
+
+Choose **Export analysis report** in **Data Overview** to download a standalone HTML report. It includes the applied dashboard filters and drill-down, charts, model statistics, activity for the selected calendar year, and the top sources and tags. Open the file in any browser to view it offline or print it to PDF.
 
 ## Screenshots
 
