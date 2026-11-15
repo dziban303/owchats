@@ -43,6 +43,90 @@
             height: 300px;
             margin-bottom: 30px;
         }
+        .activity-scroll {
+            position: relative;
+            overflow-x: auto;
+        }
+        .activity-scroll:focus-visible {
+            outline: 2px solid var(--bs-primary-text-emphasis);
+            outline-offset: 2px;
+        }
+        .activity-grid {
+            border-collapse: separate;
+            border-spacing: 3px;
+            width: 100%;
+            text-align: center;
+            font-size: .75rem;
+            --activity-low: #e2edff;
+            --activity-medium: #bcd7fc;
+            --activity-high: #8bb9f8;
+            --activity-peak: #609bf0;
+            --activity-ink: #101e35;
+        }
+        [data-bs-theme="dark"] .activity-grid {
+            --activity-low: #1c3150;
+            --activity-medium: #254775;
+            --activity-high: #2b5997;
+            --activity-peak: #3067ad;
+            --activity-ink: #fff;
+        }
+        .activity-grid th {
+            padding-inline: .2rem;
+            font-weight: 500;
+            white-space: nowrap;
+            color: var(--bs-secondary-color);
+        }
+        .activity-grid th[scope="row"],
+        .activity-grid thead th:first-child {
+            position: sticky;
+            inset-inline-start: 0;
+            z-index: 1;
+            background-color: var(--bs-card-bg);
+            text-align: start;
+            padding-inline-end: .5rem;
+        }
+        .activity-grid td {
+            min-width: 1.4rem;
+            height: 1.5rem;
+            border-radius: .2rem;
+            font-variant-numeric: tabular-nums;
+        }
+        .activity-calendar td {
+            min-width: 1.1rem;
+            padding: 0;
+            font-size: .65rem;
+        }
+        .activity-calendar button {
+            display: block;
+            width: 100%;
+            min-height: 1.5rem;
+            padding: 0 .1rem;
+            border: 0;
+            border-radius: inherit;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+        }
+        .activity-calendar button:hover,
+        .activity-calendar button:focus-visible,
+        .activity-calendar button[aria-pressed="true"] {
+            outline: 2px solid var(--bs-emphasis-color);
+            outline-offset: -2px;
+        }
+        .activity-grid [data-activity-level] {
+            background-color: var(--bs-tertiary-bg);
+            color: var(--activity-ink);
+        }
+        .activity-grid [data-activity-level="1"] { background-color: var(--activity-low); }
+        .activity-grid [data-activity-level="2"] { background-color: var(--activity-medium); }
+        .activity-grid [data-activity-level="3"] { background-color: var(--activity-high); }
+        .activity-grid [data-activity-level="4"] { background-color: var(--activity-peak); }
+        #model-analytics tr {
+            cursor: pointer;
+        }
+        #model-analytics button {
+            overflow-wrap: anywhere;
+        }
         #chat-details {
             height: 400px;
             overflow-y: auto;
@@ -496,6 +580,56 @@
                 </div>
             </div>
 
+            <section class="card mb-4" aria-labelledby="model-analytics-heading">
+                <div class="card-header">
+                    <h5 id="model-analytics-heading" class="mb-0">Model Analytics</h5>
+                </div>
+                <div class="card-body">
+                    <p id="model-analytics-help" class="small text-body-secondary mb-3">Select a model to view its chats. Counts include alternate branches. Median length uses replies with text.</p>
+                    <p id="model-analytics-empty" class="text-body-secondary mb-0" hidden>No assistant replies match the current filters.</p>
+                    <div id="model-analytics-table" class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" aria-labelledby="model-analytics-heading" aria-describedby="model-analytics-help">
+                            <thead>
+                                <tr>
+                                    <th scope="col"><button type="button" class="sort-button btn btn-sm border-0 p-0 text-reset fw-bold" data-model-sort="name">Model <span class="sort-indicator" aria-hidden="true"></span></button></th>
+                                    <th scope="col" class="text-end"><button type="button" class="sort-button btn btn-sm border-0 p-0 text-reset fw-bold" data-model-sort="chats">Chats <span class="sort-indicator" aria-hidden="true"></span></button></th>
+                                    <th scope="col" class="text-end" aria-sort="descending"><button type="button" class="sort-button btn btn-sm border-0 p-0 text-reset fw-bold" data-model-sort="replies">Replies <span class="sort-indicator" aria-hidden="true"></span></button></th>
+                                    <th scope="col" class="text-end"><button type="button" class="sort-button btn btn-sm border-0 p-0 text-reset fw-bold" data-model-sort="median">Median chars <span class="sort-indicator" aria-hidden="true"></span></button></th>
+                                    <th scope="col" class="text-end"><button type="button" class="sort-button btn btn-sm border-0 p-0 text-reset fw-bold" data-model-sort="sourceRate">Replies with sources <span class="sort-indicator" aria-hidden="true"></span></button></th>
+                                </tr>
+                            </thead>
+                            <tbody id="model-analytics"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card mb-4" aria-labelledby="activity-heading">
+                <div class="card-header">
+                    <h5 id="activity-heading" class="mb-0">Chat Activity</h5>
+                </div>
+                <div class="card-body">
+                    <p id="activity-summary" class="small text-body-secondary mb-3" role="status"></p>
+                    <div id="activity-panels" hidden>
+                        <h6 id="activity-hours-heading">Messages by weekday and hour</h6>
+                        <div id="activity-hours" class="activity-scroll mb-4" tabindex="0"
+                            role="region" aria-labelledby="activity-hours-heading"></div>
+
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                            <h6 id="activity-calendar-heading" class="mb-0">Daily activity and weekly totals</h6>
+                            <div class="d-flex align-items-center gap-2">
+                                <label for="activity-year" class="small">Year</label>
+                                <select id="activity-year" class="form-select form-select-sm w-auto"></select>
+                            </div>
+                        </div>
+                        <p id="activity-calendar-help" class="small text-body-secondary mb-2">Select a day or week total to view its chats. Use the arrow keys to move between cells.</p>
+                        <div id="activity-calendar" class="activity-scroll"
+                            role="region" aria-labelledby="activity-calendar-heading" aria-describedby="activity-calendar-help"></div>
+                    </div>
+                    <p id="activity-selection" class="small text-body-secondary mt-3 mb-0" role="status" hidden></p>
+                </div>
+            </section>
+
             <div class="row mb-4">
                 <div class="col-md-6">
                     <div class="card">
@@ -697,6 +831,12 @@
         // Main data object
         let chatData = [];
         let filteredData = [];
+        let chatFilter = { chats: [], startTimestamp: -Infinity };
+        let activityPeriod = null;
+        let replyModelFilter = null;
+        let modelComparison = { chats: [], includeMessage: null, stats: new Map() };
+        let modelSortKey = 'replies';
+        let modelSortDirection = -1;
         let pageSize = 10;
         let currentPage = 0;
         let chatSortKey = null;
@@ -733,6 +873,7 @@
             setupTheme();
             setupOpenWebUISettings();
             setupChatListControls();
+            setupModelAnalytics();
             setupSourcesControls();
             setupTagsControls();
             setupEventListeners();
@@ -1013,22 +1154,16 @@
 
         // Process and display the data
         function processData(data) {
-            filteredData = [...data];
-            currentPage = 0;
+            chatFilter = { chats: data, startTimestamp: -Infinity };
+            activityPeriod = null;
+            replyModelFilter = null;
             selectedChats.clear();
             messageSearchCache = new WeakMap();
-            
-            // Populate overview statistics
+
             displayOverviewStats(data);
-            
-            // Generate charts
-            generateCharts(data);
-            
-            // Populate the filters
             populateFilters(data);
-            
-            // Display chat list
-            displayChatList();
+            renderActivityHeatmaps(data);
+            renderFilteredResults(true);
         }
 
         // Display overview statistics
@@ -1061,50 +1196,21 @@
             document.getElementById('models-used').textContent = uniqueModels.size;
         }
 
-        // Generate charts
-        function generateCharts(data) {
-            // Destroy existing charts before creating new ones
-            destroyCharts();
-            
-            // Model usage chart
+        function generateOverviewCharts(data) {
+            modelChart?.destroy();
+            timeChart?.destroy();
             generateModelChart(data);
-            
-            // Time-based chart
             generateTimeChart(data);
-            
-            // Message distribution chart
-            generateMessageChart(data);
-            
-            // Sources chart
-            generateSourcesChart(data);
-            generateTagChart(data);
         }
 
-        // Destroy all existing charts to prevent errors when regenerating
-        function destroyCharts() {
-            if (modelChart) {
-                modelChart.destroy();
-                modelChart = null;
-            }
-            
-            if (timeChart) {
-                timeChart.destroy();
-                timeChart = null;
-            }
-            
-            if (messageChart) {
-                messageChart.destroy();
-                messageChart = null;
-            }
-            
-            if (sourcesChart) {
-                sourcesChart.destroy();
-                sourcesChart = null;
-            }
-            if (tagsChart) {
-                tagsChart.destroy();
-                tagsChart = null;
-            }
+        function generateDetailCharts(data, includeMessage) {
+            messageChart?.destroy();
+            sourcesChart?.destroy();
+            tagsChart?.destroy();
+            tagsChart = null;
+            generateMessageChart(data, includeMessage);
+            generateSourcesChart(data, includeMessage);
+            generateTagChart(data);
         }
 
         // Generate model usage chart
@@ -1160,6 +1266,107 @@
             };
         }
 
+        function collectModelAnalytics(chats, includeMessage) {
+            const models = new Map();
+            for (const chat of chats) {
+                const history = new Map(Object.entries(chat.chat?.history?.messages ?? {})
+                    .map(([id, message]) => [message.id || id, message]));
+                for (const reply of getConversationMessages(chat)) {
+                    if (reply.role !== 'assistant' || (includeMessage && !includeMessage(reply))) continue;
+                    const historyReply = history.get(reply.id);
+                    const model = [reply.model, historyReply?.model, reply.modelName, historyReply?.modelName]
+                        .find(value => typeof value === 'string' && value.trim())?.trim() ?? '';
+                    if (!models.has(model)) {
+                        models.set(model, { chats: new Set(), replies: 0, lengths: [], sourced: 0 });
+                    }
+                    const stats = models.get(model);
+                    stats.chats.add(chat);
+                    stats.replies++;
+                    const content = reply.content ?? historyReply?.content;
+                    const text = typeof content === 'string' ? content.trim() : '';
+                    if (text) stats.lengths.push(Array.from(text).length);
+                    if ([reply.sources, historyReply?.sources].some(sources => sources?.some(item => item?.source))) {
+                        stats.sourced++;
+                    }
+                }
+            }
+
+            for (const [model, { chats, replies, lengths, sourced }] of models) {
+                lengths.sort((a, b) => a - b);
+                const middle = Math.floor(lengths.length / 2);
+                const median = !lengths.length ? null : lengths.length % 2
+                    ? lengths[middle] : (lengths[middle - 1] + lengths[middle]) / 2;
+                models.set(model, { chats, replies, median, sourced, sourceRate: sourced / replies });
+            }
+            return models;
+        }
+
+        function getAnalyticsModelLabel(model) {
+            return model || 'Unknown model';
+        }
+
+        function setupModelAnalytics() {
+            const sortButtons = document.querySelectorAll('[data-model-sort]');
+            for (const button of sortButtons) {
+                button.addEventListener('click', () => {
+                    const key = button.dataset.modelSort;
+                    modelSortDirection = key === modelSortKey ? -modelSortDirection : key === 'name' ? 1 : -1;
+                    modelSortKey = key;
+                    setSortIndicator(sortButtons, button, modelSortDirection);
+                    renderModelAnalytics();
+                });
+            }
+        }
+
+        function renderModelAnalytics() {
+            const models = [...modelComparison.stats];
+            document.getElementById('model-analytics-empty').hidden = models.length > 0;
+            document.getElementById('model-analytics-table').hidden = models.length === 0;
+            const labelOrder = ([a], [b]) => chatCollator.compare(getAnalyticsModelLabel(a), getAnalyticsModelLabel(b));
+            models.sort((a, b) => {
+                if (modelSortKey === 'name') return modelSortDirection * labelOrder(a, b);
+                const left = modelSortKey === 'chats' ? a[1].chats.size : a[1][modelSortKey];
+                const right = modelSortKey === 'chats' ? b[1].chats.size : b[1][modelSortKey];
+                if (left === null || right === null) return (left === null) - (right === null) || labelOrder(a, b);
+                return modelSortDirection * (left - right) || labelOrder(a, b);
+            });
+
+            const numbers = new Intl.NumberFormat();
+            const percentages = new Intl.NumberFormat(undefined, { style: 'percent', maximumFractionDigits: 1 });
+            const rows = document.createDocumentFragment();
+            for (const [model, stats] of models) {
+                const row = document.createElement('tr');
+                row.classList.toggle('table-active', replyModelFilter === model);
+                const name = document.createElement('th');
+                name.scope = 'row';
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'btn btn-link text-start p-0';
+                button.textContent = getAnalyticsModelLabel(model);
+                button.setAttribute('aria-pressed', String(replyModelFilter === model));
+                name.append(button);
+                row.append(name);
+                row.addEventListener('click', () => {
+                    replyModelFilter = replyModelFilter === model ? null : model;
+                    updateModelResults();
+                    document.getElementById('chat-list-heading').focus();
+                });
+                const values = [
+                    numbers.format(stats.chats.size),
+                    numbers.format(stats.replies),
+                    stats.median === null ? '—' : numbers.format(stats.median),
+                    percentages.format(stats.sourceRate) + ' (' + numbers.format(stats.sourced) + ')'
+                ];
+                for (const value of values) {
+                    const cell = row.insertCell();
+                    cell.className = 'text-end text-nowrap';
+                    cell.textContent = value;
+                }
+                rows.append(row);
+            }
+            document.getElementById('model-analytics').replaceChildren(rows);
+        }
+
         // Generate time-based chart
         function generateTimeChart(data) {
             // Group chats by date (monthly)
@@ -1201,33 +1408,278 @@
             });
         }
 
+        const activityWeekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const activityDayMs = 86400000;
+        const activityDateFormat = new Intl.DateTimeFormat(undefined, {
+            dateStyle: 'medium', timeZone: 'UTC', calendar: 'gregory'
+        });
+        const activityMonthFormat = new Intl.DateTimeFormat(undefined, {
+            month: 'short', timeZone: 'UTC', calendar: 'gregory'
+        });
+        const activityCountFormat = new Intl.NumberFormat();
+        const activityCompactFormat = new Intl.NumberFormat(undefined, { notation: 'compact' });
+
+        function getActivityMessageDate(message, startTimestamp) {
+            const seconds = Number(message.timestamp);
+            if (!(seconds > 0) || seconds < startTimestamp) return null;
+            const date = new Date(seconds * 1000);
+            return Number.isFinite(date.getTime()) ? date : null;
+        }
+
+        function getActivityDay(date) {
+            // Store local calendar dates on a UTC grid so DST cannot shift the day or week columns.
+            return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+        }
+
+        function collectActivity(chats, startTimestamp) {
+            const hours = activityWeekdays.map(() => Array(24).fill(0));
+            const days = new Map();
+            const years = new Set();
+            let total = 0;
+            for (const chat of chats) {
+                for (const message of getConversationMessages(chat)) {
+                    if (message.role !== 'user') continue;
+                    const date = getActivityMessageDate(message, startTimestamp);
+                    if (!date) continue;
+
+                    const day = getActivityDay(date);
+                    const weekday = (date.getDay() + 6) % 7;
+                    hours[weekday][date.getHours()]++;
+                    days.set(day, (days.get(day) ?? 0) + 1);
+                    years.add(date.getFullYear());
+                    total++;
+                }
+            }
+            return { hours, days, years: [...years].sort((a, b) => b - a), total };
+        }
+
+        function appendActivityHeader(row, label, scope) {
+            const header = document.createElement('th');
+            header.textContent = label;
+            header.scope = scope;
+            row.append(header);
+            return header;
+        }
+
+        function appendActivityCell(row, count, maximum, label, period = null) {
+            const cell = row.insertCell();
+            const exactCount = activityCountFormat.format(count);
+            cell.title = label + ' · ' + exactCount + (count === 1 ? ' user message' : ' user messages');
+            if (maximum !== null) {
+                cell.dataset.activityLevel = count ? Math.ceil(4 * Math.sqrt(count / maximum)) : 0;
+            }
+            const visibleCount = count < 100 ? exactCount : activityCompactFormat.format(count);
+            if (period) {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.tabIndex = -1;
+                button.dataset.activityPeriod = period.join(':');
+                button.setAttribute('aria-label', cell.title);
+                button.setAttribute('aria-controls', 'chat-list');
+                button.textContent = count ? visibleCount : '';
+                button.addEventListener('click', () => {
+                    activityPeriod = period;
+                    renderFilteredResults();
+                    document.getElementById('chat-list-heading').focus();
+                });
+                cell.append(button);
+            } else {
+                const accessible = document.createElement('span');
+                accessible.className = 'visually-hidden';
+                accessible.textContent = cell.title;
+                cell.append(accessible);
+                if (count) {
+                    const visible = document.createElement('span');
+                    visible.setAttribute('aria-hidden', 'true');
+                    visible.textContent = visibleCount;
+                    cell.append(visible);
+                }
+            }
+        }
+
+        function renderActivityHours(hours) {
+            const table = document.createElement('table');
+            table.className = 'activity-grid';
+            table.setAttribute('aria-labelledby', 'activity-hours-heading');
+            const header = table.createTHead().insertRow();
+            appendActivityHeader(header, 'Weekday', 'col');
+            const labels = hours[0].map((_, hour) => String(hour).padStart(2, '0') + ':00');
+            labels.forEach(label => appendActivityHeader(header, label, 'col'));
+
+            const body = table.createTBody();
+            const maximum = Math.max(...hours.flat());
+            hours.forEach((counts, weekday) => {
+                const row = body.insertRow();
+                const day = activityWeekdays[weekday];
+                appendActivityHeader(row, day, 'row');
+                counts.forEach((count, hour) => appendActivityCell(row, count, maximum, day + ' ' + labels[hour]));
+            });
+            document.getElementById('activity-hours').replaceChildren(table);
+        }
+
+        function renderActivityCalendar(days, year) {
+            const firstDay = Date.UTC(year, 0, 1);
+            const end = Date.UTC(year + 1, 0, 1);
+            const daysSinceMonday = (new Date(firstDay).getUTCDay() + 6) % 7;
+            const firstMonday = firstDay - daysSinceMonday * activityDayMs;
+            const weeks = [];
+            let maximum = 0;
+            for (let monday = firstMonday; monday < end; monday += 7 * activityDayMs) {
+                const week = activityWeekdays.map((_, weekday) => {
+                    const day = monday + weekday * activityDayMs;
+                    if (day < firstDay || day >= end) return null;
+                    const count = days.get(day) ?? 0;
+                    maximum = Math.max(maximum, count);
+                    return { day, count };
+                });
+                weeks.push(week);
+            }
+
+            const table = document.createElement('table');
+            table.className = 'activity-grid activity-calendar';
+            table.setAttribute('aria-labelledby', 'activity-calendar-heading');
+            const header = table.createTHead().insertRow();
+            appendActivityHeader(header, year, 'col');
+            let monthName;
+            let monthHeader;
+            for (const week of weeks) {
+                const firstDate = week.find(Boolean).day;
+                const month = activityMonthFormat.format(firstDate);
+                if (month === monthName) {
+                    monthHeader.colSpan++;
+                } else {
+                    monthName = month;
+                    monthHeader = appendActivityHeader(header, month, 'col');
+                }
+            }
+
+            const body = table.createTBody();
+            activityWeekdays.forEach((weekday, index) => {
+                const row = body.insertRow();
+                appendActivityHeader(row, weekday, 'row');
+                for (const week of weeks) {
+                    const entry = week[index];
+                    if (entry) {
+                        appendActivityCell(row, entry.count, maximum, activityDateFormat.format(entry.day),
+                            ['day', entry.day, entry.day]);
+                    } else {
+                        row.insertCell();
+                    }
+                }
+            });
+
+            const totals = table.createTFoot().insertRow();
+            appendActivityHeader(totals, 'Week total', 'row');
+            for (const week of weeks) {
+                const dates = week.filter(Boolean);
+                const count = dates.reduce((sum, entry) => sum + entry.count, 0);
+                const first = dates[0].day;
+                const last = dates.at(-1).day;
+                const range = activityDateFormat.formatRange(first, last);
+                appendActivityCell(totals, count, null, 'Week of ' + range, ['week', first, last]);
+            }
+            document.getElementById('activity-calendar').replaceChildren(table);
+            setupActivityCalendarKeys(table);
+            renderActivitySelection();
+        }
+
+        function setupActivityCalendarKeys(table) {
+            const keyDirections = new Map([
+                ['ArrowLeft', [0, -1]], ['ArrowRight', [0, 1]], ['ArrowUp', [-1, 0]], ['ArrowDown', [1, 0]]
+            ]);
+            table.addEventListener('focusin', event => {
+                const button = event.target.closest('button');
+                if (!button) return;
+                const previous = table.querySelector('button[tabindex="0"]');
+                if (previous) previous.tabIndex = -1;
+                button.tabIndex = 0;
+            });
+            table.addEventListener('keydown', event => {
+                const direction = keyDirections.get(event.key);
+                const button = event.target.closest('button');
+                if (!button || !direction) return;
+                event.preventDefault();
+                const [rowStep, columnStep] = direction;
+                const cell = button.closest('td');
+                let row = cell.parentElement.rowIndex + rowStep;
+                let column = cell.cellIndex + columnStep;
+                while (row > 0 && row < table.rows.length && column > 0 && column < table.rows[row].cells.length) {
+                    const next = table.rows[row].cells[column].querySelector('button');
+                    if (next) {
+                        next.focus();
+                        return;
+                    }
+                    row += rowStep;
+                    column += columnStep;
+                }
+            });
+        }
+
+        function getActivityPeriodLabel() {
+            const [kind, first, last] = activityPeriod;
+            return kind === 'day' ? activityDateFormat.format(first) : 'Week of ' + activityDateFormat.formatRange(first, last);
+        }
+
+        function renderActivitySelection() {
+            const summary = document.getElementById('activity-selection');
+            summary.hidden = !activityPeriod;
+            summary.textContent = activityPeriod ? 'Selected activity period · ' + getActivityPeriodLabel() : '';
+
+            const calendar = document.getElementById('activity-calendar');
+            const selectedKey = activityPeriod?.join(':');
+            const buttons = [...calendar.querySelectorAll('button')];
+            for (const button of buttons) {
+                button.setAttribute('aria-pressed', String(button.dataset.activityPeriod === selectedKey));
+            }
+            if (!calendar.querySelector('button[tabindex="0"]')) {
+                const first = calendar.querySelector('button[aria-pressed="true"]')
+                    ?? calendar.querySelector('td[data-activity-level]:not([data-activity-level="0"]) button')
+                    ?? buttons[0];
+                if (first) first.tabIndex = 0;
+            }
+        }
+
+        function renderActivityHeatmaps(chats, startTimestamp = -Infinity) {
+            const { hours, days, years, total } = collectActivity(chats, startTimestamp);
+            const summary = document.getElementById('activity-summary');
+            const panels = document.getElementById('activity-panels');
+            panels.hidden = total === 0;
+            if (!total) {
+                summary.textContent = 'No dated user messages match the current filters.';
+                return;
+            }
+
+            const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const count = activityCountFormat.format(total) + (total === 1 ? ' user message' : ' user messages');
+            summary.textContent = count + ' by date sent in ' + timeZone
+                + '. Color intensity shows the count within each grid. Weeks start on Monday.';
+            renderActivityHours(hours);
+            const yearSelect = document.getElementById('activity-year');
+            const previousYear = Number(yearSelect.value);
+            yearSelect.replaceChildren(...years.map(year => new Option(year, year)));
+            if (years.includes(previousYear)) yearSelect.value = previousYear;
+            const updateCalendar = () => renderActivityCalendar(days, Number(yearSelect.value));
+            yearSelect.onchange = updateCalendar;
+            updateCalendar();
+        }
+
         // Generate message distribution chart
-        function generateMessageChart(data) {
+        function generateMessageChart(data, includeMessage) {
             const messageDistribution = {
                 user: 0,
                 assistant: 0
             };
             
-            data.forEach(chat => {
-                if (chat.chat && chat.chat.messages) {
-                    chat.chat.messages.forEach(msg => {
-                        if (msg.role === 'user') {
-                            messageDistribution.user++;
-                        } else if (msg.role === 'assistant') {
-                            messageDistribution.assistant++;
-                        }
-                    });
-                } else if (chat.chat && chat.chat.history && chat.chat.history.messages) {
-                    Object.values(chat.chat.history.messages).forEach(msg => {
-                        if (msg.role === 'user') {
-                            messageDistribution.user++;
-                        } else if (msg.role === 'assistant') {
-                            messageDistribution.assistant++;
-                        }
-                    });
+            for (const chat of data) {
+                const messages = includeMessage ? getConversationMessages(chat)
+                    : chat.chat?.messages ?? Object.values(chat.chat?.history?.messages ?? {});
+                for (const message of messages) {
+                    if (includeMessage && !includeMessage(message)) continue;
+                    if (message.role === 'user') messageDistribution.user++;
+                    if (message.role === 'assistant') messageDistribution.assistant++;
                 }
-            });
-            
+            }
+
             const ctx = document.getElementById('message-chart').getContext('2d');
             messageChart = new Chart(ctx, {
                 type: 'pie',
@@ -1254,7 +1706,7 @@
         }
 
         // Generate sources chart
-        function generateSourcesChart(data) {
+        function generateSourcesChart(data, includeMessage) {
             const sourceTypes = new Map();
             const sources = new Map();
             const chatsById = new Map(chatData.filter(chat => chat.id).map(chat => [chat.id, chat]));
@@ -1280,6 +1732,7 @@
                     });
 
                 for (const message of [...history.map(([, message]) => message), ...messages]) {
+                    if (includeMessage && !includeMessage(message)) continue;
                     for (const { source } of message.sources ?? []) {
                         if (!source) continue;
 
@@ -1760,6 +2213,14 @@
             const startIdx = currentPage * pageSize;
             matchingChats = chats;
             pageChats = chats.slice(startIdx, startIdx + pageSize);
+            if ((activityPeriod || replyModelFilter !== null) && !pageChats.length) {
+                const empty = chatList.insertRow().insertCell();
+                empty.colSpan = 8;
+                empty.className = 'text-body-secondary';
+                empty.textContent = activityPeriod
+                    ? 'No chats match this activity period and the current filters.'
+                    : 'No chats match the current filters.';
+            }
             for (const chat of pageChats) {
                 const row = document.createElement('tr');
                 const createdDate = new Date(chat.created_at * 1000).toLocaleString();
@@ -2198,7 +2659,7 @@
         function renderActiveFilters() {
             const container = document.getElementById('active-chat-filters');
             container.replaceChildren();
-            const addChip = (label, clear) => {
+            const addChip = (label, clear, apply = applyFilters) => {
                 const button = document.createElement('button');
                 button.type = 'button';
                 button.className = 'btn btn-sm btn-outline-secondary';
@@ -2206,7 +2667,7 @@
                 button.setAttribute('aria-label', `Clear filter: ${label}`);
                 button.addEventListener('click', () => {
                     clear();
-                    applyFilters();
+                    apply();
                 });
                 container.append(button);
             };
@@ -2218,6 +2679,18 @@
             }
             for (const tag of requiredTags) addChip(`Tag: ${tag}`, () => requiredTags.delete(tag));
             if (untaggedOnly) addChip('Untagged only', () => { untaggedOnly = false; });
+            if (activityPeriod) {
+                addChip('Activity: ' + getActivityPeriodLabel(), () => {
+                    activityPeriod = null;
+                    document.getElementById('chat-list-heading').focus({ preventScroll: true });
+                });
+            }
+            if (replyModelFilter !== null) {
+                addChip('Reply model: ' + getAnalyticsModelLabel(replyModelFilter), () => {
+                    replyModelFilter = null;
+                    document.getElementById('chat-list-heading').focus({ preventScroll: true });
+                }, updateModelResults);
+            }
             const untagged = document.getElementById('untagged-filter');
             untagged.setAttribute('aria-pressed', String(untaggedOnly));
             untagged.classList.toggle('active', untaggedOnly);
@@ -2231,6 +2704,7 @@
             
             // Start with all data
             let filtered = [...chatData];
+            let startTimestamp = -Infinity;
             
             // Apply date filter
             if (dateFilter !== 'all') {
@@ -2248,12 +2722,11 @@
                         startDate = new Date(now.setDate(now.getDate() - 30));
                         break;
                     case 'year':
-                        startDate = new Date(now.setMonth(0, 1));
+                        startDate = new Date(now.getFullYear(), 0, 1);
                         break;
                 }
                 
-                const startTimestamp = Math.floor(startDate.getTime() / 1000);
-                filtered = filtered.filter(chat => chat.created_at >= startTimestamp);
+                startTimestamp = Math.floor(startDate.getTime() / 1000);
             }
             
             // Apply model filter
@@ -2276,14 +2749,45 @@
                 });
             }
             
-            // Update filtered data and display
-            filteredData = filtered;
+            chatFilter = { chats: filtered, startTimestamp };
+            // Activity dates refer to individual sends, including replies in older chats.
+            renderActivityHeatmaps(filtered, startTimestamp);
+            renderFilteredResults(true);
+        }
+
+        function renderFilteredResults(refreshOverview = false) {
+            const { chats, startTimestamp } = chatFilter;
+            const datedChats = startTimestamp === -Infinity ? chats : chats.filter(chat => chat.created_at >= startTimestamp);
+            let includeMessage = null;
+            let comparisonChats = datedChats;
+            if (activityPeriod) {
+                const [, first, last] = activityPeriod;
+                includeMessage = message => {
+                    const date = getActivityMessageDate(message, startTimestamp);
+                    if (!date) return false;
+                    const day = getActivityDay(date);
+                    return day >= first && day <= last;
+                };
+                comparisonChats = chats.filter(chat => getConversationMessages(chat)
+                    .some(message => message.role === 'user' && includeMessage(message)));
+            }
+
+            modelComparison = {
+                chats: comparisonChats,
+                includeMessage,
+                stats: collectModelAnalytics(comparisonChats, includeMessage)
+            };
+            if (refreshOverview) generateOverviewCharts(datedChats);
+            updateModelResults();
+        }
+
+        function updateModelResults() {
+            const { chats, includeMessage, stats } = modelComparison;
+            filteredData = replyModelFilter === null ? chats : [...(stats.get(replyModelFilter)?.chats ?? [])];
             currentPage = 0;
-            
-            // Regenerate charts with filtered data
-            generateCharts(filteredData);
-            
-            // Update the list
+            generateDetailCharts(filteredData, includeMessage);
+            renderModelAnalytics();
+            renderActivitySelection();
             renderActiveFilters();
             displayChatList();
         }
@@ -2297,6 +2801,8 @@
             
             requiredTags.clear();
             untaggedOnly = false;
+            activityPeriod = null;
+            replyModelFilter = null;
             applyFilters();
         }
     </script>

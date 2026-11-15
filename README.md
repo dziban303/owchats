@@ -29,6 +29,9 @@ This will download a file named `all-chats-export-<id>.json` to your computer.
 ## Features
 
 - Interactive charts showing model usage, chat timeline, and message distribution
+- Sortable Model Analytics table with chats, saved replies, median reply length in characters, and the share of replies with sources. Select a model to open its chats.
+- Activity heatmaps for user messages by weekday, hour, and calendar day, with weekly totals in your browser's time zone
+  - Select a day or week total to open matching chats and update the message, source, and tag charts. Clear the activity filter in the Chat List to return to the broader results.
 - Ability to filter chats by date, model, and user
 - Detailed message view with source references when available
 - Read-only conversation tree with the saved path and alternate branches. Open a conversation from the Chat List and select **Conversation tree**.
