@@ -31,6 +31,7 @@ This will download a file named `all-chats-export-<id>.json` to your computer.
 - Interactive charts showing model usage, chat timeline, and message distribution
 - Ability to filter chats by date, model, and user
 - Detailed message view with source references when available
+- Read-only conversation tree with the saved path and alternate branches. Open a conversation from the Chat List and select **Conversation tree**.
 - Search functionality to find specific chats
 - Sources and tags functionality
 - File upload to analyze your own JSON data
