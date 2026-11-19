@@ -368,6 +368,11 @@
             width: 45%;
             min-width: 8rem;
         }
+        .generation-title-column {
+            width: 25%;
+            min-width: 12rem;
+            max-width: 24rem;
+        }
         .chat-list-title {
             contain: inline-size;
             overflow: hidden;
@@ -437,6 +442,16 @@
         .conversation-node:focus-visible {
             outline: 2px solid var(--bs-primary-text-emphasis);
             outline-offset: -2px;
+        }
+        .branch-comparison {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+        .branch-comparison > div { min-width: 0; overflow-wrap: anywhere; }
+        .branch-comparison pre { max-width: 100%; overflow: auto; }
+        @media (max-width: 767.98px) {
+            .branch-comparison { grid-template-columns: minmax(0, 1fr); }
         }
         .conversation-message-content {
             white-space: pre-wrap;
@@ -708,7 +723,7 @@
                     <h5 id="model-analytics-heading" class="mb-0">Model Analytics</h5>
                 </div>
                 <div class="card-body">
-                    <p id="model-analytics-help" class="small text-body-secondary mb-3">Select a model to view its chats. Counts include alternate branches. Median length uses replies with text.</p>
+                    <p id="model-analytics-help" class="small text-body-secondary mb-3">Select a model to view its chats. Counts include alternate branches. Median length uses replies with text. Usage / speed coverage shows how many replies have token counts and generation speed.</p>
                     <p id="model-analytics-empty" class="text-body-secondary mb-0" hidden>No assistant replies match the current filters.</p>
                     <div id="model-analytics-table" class="table-responsive">
                         <table class="table table-hover align-middle mb-0" aria-labelledby="model-analytics-heading" aria-describedby="model-analytics-help">
@@ -719,11 +734,76 @@
                                     <th scope="col" class="text-end" aria-sort="descending"><button type="button" class="sort-button btn btn-sm border-0 p-0 text-reset fw-bold" data-model-sort="replies">Replies <span class="sort-indicator" aria-hidden="true"></span></button></th>
                                     <th scope="col" class="text-end"><button type="button" class="sort-button btn btn-sm border-0 p-0 text-reset fw-bold" data-model-sort="median">Median chars <span class="sort-indicator" aria-hidden="true"></span></button></th>
                                     <th scope="col" class="text-end"><button type="button" class="sort-button btn btn-sm border-0 p-0 text-reset fw-bold" data-model-sort="sourceRate">Replies with sources <span class="sort-indicator" aria-hidden="true"></span></button></th>
+                                    <th scope="col" class="text-end"><button type="button" class="sort-button btn btn-sm border-0 p-0 text-reset fw-bold" data-model-sort="inputTokens">Input tokens <span class="sort-indicator" aria-hidden="true"></span></button></th>
+                                    <th scope="col" class="text-end"><button type="button" class="sort-button btn btn-sm border-0 p-0 text-reset fw-bold" data-model-sort="outputTokens">Output tokens <span class="sort-indicator" aria-hidden="true"></span></button></th>
+                                    <th scope="col" class="text-end"><button type="button" class="sort-button btn btn-sm border-0 p-0 text-reset fw-bold" data-model-sort="medianSpeed">Median tok/s <span class="sort-indicator" aria-hidden="true"></span></button></th>
+                                    <th scope="col" class="text-end"><button type="button" class="sort-button btn btn-sm border-0 p-0 text-reset fw-bold" data-model-sort="medianGeneration">Median gen s <span class="sort-indicator" aria-hidden="true"></span></button></th>
+                                    <th scope="col" class="text-end">Usage / speed coverage</th>
                                 </tr>
                             </thead>
                             <tbody id="model-analytics"></tbody>
                         </table>
                     </div>
+                </div>
+            </section>
+
+            <section class="card mb-4" aria-labelledby="generation-heading">
+                <div class="card-header"><h5 id="generation-heading" class="mb-0">Generation Statistics</h5></div>
+                <div class="card-body">
+                    <p class="small text-body-secondary">Recorded provider measurements across saved replies and alternate branches. Token totals cover replies with usage data. Generation time excludes prompt evaluation and loading. Chat parameters describe saved chat settings.</p>
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                        <label for="generation-model">Model</label>
+                        <select id="generation-model" class="form-select form-select-sm w-auto"><option value="all">All models</option></select>
+                        <label for="generation-sort">Sort</label>
+                        <select id="generation-sort" class="form-select form-select-sm w-auto">
+                            <option value="newest">Newest first</option>
+                            <option value="fastest">Fastest first</option>
+                            <option value="slowest">Slowest first</option>
+                            <option value="output">Most output tokens</option>
+                        </select>
+                        <button id="generation-export" type="button" class="btn btn-sm btn-outline-primary">Export measurements CSV</button>
+                    </div>
+                    <p id="generation-count" class="small text-body-secondary" role="status"></p>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <caption class="visually-hidden">Saved generation measurements</caption>
+                            <thead><tr><th scope="col">Chat / reply</th><th scope="col">Model</th><th scope="col">Input</th><th scope="col">Output</th><th scope="col">tok/s</th><th scope="col">Gen s</th><th scope="col">Prompt s</th><th scope="col">Total s</th><th scope="col">Recorded data</th></tr></thead>
+                            <tbody id="generation-list"></tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-between gap-2">
+                        <button id="generation-previous" type="button" class="btn btn-sm btn-outline-secondary">Previous measurements</button>
+                        <button id="generation-next" type="button" class="btn btn-sm btn-outline-secondary">Next measurements</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card mb-4" aria-labelledby="switching-heading">
+                <div class="card-header"><h5 id="switching-heading" class="mb-0">Model Switching</h5></div>
+                <div class="card-body">
+                    <p class="small text-body-secondary">Transitions between successive assistant replies on each saved branch. Open an example at the reply where the model changed.</p>
+                    <p id="switching-count" class="small text-body-secondary" role="status"></p>
+                    <div class="table-responsive"><table class="table align-middle">
+                        <caption class="visually-hidden">Model transitions</caption>
+                        <thead><tr><th scope="col">From</th><th scope="col">To</th><th scope="col">Switches</th><th scope="col">Chats</th><th scope="col">Median replies before switch</th><th scope="col">Example</th></tr></thead>
+                        <tbody id="switching-list"></tbody>
+                    </table></div>
+                </div>
+            </section>
+
+            <section class="card mb-4" aria-labelledby="period-heading">
+                <div class="card-header"><h5 id="period-heading" class="mb-0">Compare Periods</h5></div>
+                <div class="card-body">
+                    <p class="small text-body-secondary">Compare message activity within inclusive dates in your browser's time zone. Model, user, and tag filters apply.</p>
+                    <form id="period-form" class="d-flex flex-wrap align-items-end gap-3 mb-3">
+                        <fieldset><legend class="fs-6">Period A</legend><label for="period-a-start">From</label> <input id="period-a-start" type="date" required class="form-control form-control-sm">
+                            <label for="period-a-end">Through</label> <input id="period-a-end" type="date" required class="form-control form-control-sm"></fieldset>
+                        <fieldset><legend class="fs-6">Period B</legend><label for="period-b-start">From</label> <input id="period-b-start" type="date" required class="form-control form-control-sm">
+                            <label for="period-b-end">Through</label> <input id="period-b-end" type="date" required class="form-control form-control-sm"></fieldset>
+                        <button type="submit" class="btn btn-sm btn-outline-primary">Compare periods</button>
+                    </form>
+                    <p id="period-status" class="small text-body-secondary" role="status"></p>
+                    <div id="period-results" class="table-responsive"></div>
                 </div>
             </section>
 
@@ -973,7 +1053,7 @@
 
         <!-- Modal for Message View -->
         <div class="modal fade" id="message-modal" tabindex="-1" aria-labelledby="message-modal-title" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 id="message-modal-title" class="modal-title">Chat Conversation</h5>
@@ -999,6 +1079,10 @@
         let modelComparison = { chats: [], includeMessage: null, stats: new Map() };
         let modelSortKey = 'replies';
         let modelSortDirection = -1;
+        let generationRecords = [];
+        let generationPage = 0;
+        const generationPageSize = 20;
+        let periodComparison = null;
         let pageSize = 10;
         let currentPage = 0;
         let chatSortKey = null;
@@ -1039,6 +1123,8 @@
             setupChatListControls();
             document.getElementById('export-report').addEventListener('click', exportAnalysisReport);
             setupModelAnalytics();
+            setupGenerationControls();
+            setupPeriodControls();
             setupSourcesControls();
             setupTagsControls();
             setupCleanupControls();
@@ -1352,6 +1438,8 @@
             chatFilter = { chats: data, startTimestamp: -Infinity, dropdowns: [] };
             activityPeriod = null;
             replyModelFilter = null;
+            periodComparison = null;
+            initializePeriods(data);
             selectedChats.clear();
             cleanupCandidates = null;
             cleanupCheckboxes.clear();
@@ -1468,39 +1556,218 @@
             };
         }
 
-        function collectModelAnalytics(chats, includeMessage) {
-            const models = new Map();
+        function getReplyModel(reply, historyReply) {
+            return [reply.model, historyReply?.model, reply.modelName, historyReply?.modelName]
+                .find(value => typeof value === 'string' && value.trim())?.trim() ?? '';
+        }
+
+        function getReplyMeasurements(reply, historyReply) {
+            const containers = [
+                reply.usage, reply.info?.usage, reply.info, reply.timings,
+                historyReply?.usage, historyReply?.info?.usage, historyReply?.info, historyReply?.timings
+            ];
+            const sources = containers.flatMap(source => [source, source?.timings]).filter(value => value && typeof value === 'object' && !Array.isArray(value));
+            const number = value => {
+                if (typeof value !== 'number' && typeof value !== 'string') return null;
+                if (typeof value === 'string' && !value.trim()) return null;
+                const numeric = Number(value);
+                return Number.isFinite(numeric) && numeric >= 0 ? numeric : null;
+            };
+            const read = (...fields) => {
+                for (const source of sources) {
+                    for (const field of fields) {
+                        const value = number(source[field]);
+                        if (value !== null) return value;
+                    }
+                }
+                return null;
+            };
+            const inputTokens = read('prompt_tokens', 'input_tokens', 'prompt_eval_count');
+            const outputTokens = read('completion_tokens', 'output_tokens', 'eval_count', 'predicted_n');
+            const seconds = field => {
+                const nanoseconds = read(field);
+                return nanoseconds !== null ? nanoseconds / 1e9 : null;
+            };
+            const predictedMs = read('predicted_ms');
+            const promptMs = read('prompt_ms');
+            const generationSeconds = seconds('eval_duration') ?? (predictedMs === null ? null : predictedMs / 1000);
+            const promptSeconds = seconds('prompt_eval_duration') ?? (promptMs === null ? null : promptMs / 1000);
+            const totalSeconds = seconds('total_duration');
+            const loadSeconds = seconds('load_duration');
+            const nativeOutput = read('eval_count', 'predicted_n');
+            const rateTokens = nativeOutput ?? outputTokens;
+            const incomplete = sources.find(source => typeof source.incomplete === 'boolean')?.incomplete === true;
+            const speed = incomplete ? null : generationSeconds > 0 && rateTokens > 0
+                ? rateTokens / generationSeconds : read('response_token/s', 'output_tokens_per_second', 'predicted_per_second');
+            return { inputTokens, outputTokens, generationSeconds, promptSeconds, totalSeconds, loadSeconds,
+                speed: speed > 0 ? speed : null, incomplete, raw: sources };
+        }
+
+        function getMedian(values) {
+            if (!values.length) return null;
+            const sorted = [...values].sort((a, b) => a - b);
+            const middle = Math.floor(sorted.length / 2);
+            return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+        }
+
+        function collectReplyRecords(chats, includeMessage) {
+            const records = [];
             for (const chat of chats) {
                 const history = new Map(Object.entries(chat.chat?.history?.messages ?? {})
                     .map(([id, message]) => [message.id || id, message]));
                 for (const reply of getConversationMessages(chat)) {
                     if (reply.role !== 'assistant' || (includeMessage && !includeMessage(reply))) continue;
                     const historyReply = history.get(reply.id);
-                    const model = [reply.model, historyReply?.model, reply.modelName, historyReply?.modelName]
-                        .find(value => typeof value === 'string' && value.trim())?.trim() ?? '';
-                    if (!models.has(model)) {
-                        models.set(model, { chats: new Set(), replies: 0, lengths: [], sourced: 0 });
-                    }
-                    const stats = models.get(model);
-                    stats.chats.add(chat);
-                    stats.replies++;
-                    const content = reply.content ?? historyReply?.content;
-                    const text = typeof content === 'string' ? content.trim() : '';
-                    if (text) stats.lengths.push(Array.from(text).length);
-                    if ([reply.sources, historyReply?.sources].some(sources => sources?.some(item => item?.source))) {
-                        stats.sourced++;
-                    }
+                    records.push({
+                        chat, reply, model: getReplyModel(reply, historyReply),
+                        content: reply.content ?? historyReply?.content,
+                        sourced: [reply.sources, historyReply?.sources].some(sources => sources?.some(item => item?.source)),
+                        measurements: getReplyMeasurements(reply, historyReply)
+                    });
                 }
             }
+            return records;
+        }
 
-            for (const [model, { chats, replies, lengths, sourced }] of models) {
-                lengths.sort((a, b) => a - b);
-                const middle = Math.floor(lengths.length / 2);
-                const median = !lengths.length ? null : lengths.length % 2
-                    ? lengths[middle] : (lengths[middle - 1] + lengths[middle]) / 2;
-                models.set(model, { chats, replies, median, sourced, sourceRate: sourced / replies });
+        function collectModelAnalytics(chats, includeMessage) {
+            const models = new Map();
+            for (const record of collectReplyRecords(chats, includeMessage)) {
+                const { chat, model, content, sourced, measurements } = record;
+                if (!models.has(model)) {
+                    models.set(model, { chats: new Set(), replies: 0, lengths: [], sourced: 0,
+                        inputs: [], outputs: [], speeds: [], generationTimes: [], usageReplies: 0 });
+                }
+                const stats = models.get(model);
+                stats.chats.add(chat);
+                stats.replies++;
+                const text = typeof content === 'string' ? content.trim() : '';
+                if (text) stats.lengths.push(Array.from(text).length);
+                if (sourced) stats.sourced++;
+                if (measurements.inputTokens !== null) stats.inputs.push(measurements.inputTokens);
+                if (measurements.outputTokens !== null) stats.outputs.push(measurements.outputTokens);
+                if (measurements.speed !== null) stats.speeds.push(measurements.speed);
+                if (!measurements.incomplete && measurements.generationSeconds > 0) stats.generationTimes.push(measurements.generationSeconds);
+                if (measurements.inputTokens !== null || measurements.outputTokens !== null) stats.usageReplies++;
+            }
+
+            for (const stats of models.values()) {
+                stats.median = getMedian(stats.lengths);
+                stats.sourceRate = stats.sourced / stats.replies;
+                stats.inputTokens = stats.inputs.length ? stats.inputs.reduce((sum, value) => sum + value, 0) : null;
+                stats.outputTokens = stats.outputs.length ? stats.outputs.reduce((sum, value) => sum + value, 0) : null;
+                stats.medianSpeed = getMedian(stats.speeds);
+                stats.medianGeneration = getMedian(stats.generationTimes);
             }
             return models;
+        }
+
+        function formatMeasurement(value) {
+            return value === null || value === undefined ? '—'
+                : new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(value);
+        }
+
+        function setupGenerationControls() {
+            for (const id of ['generation-model', 'generation-sort']) {
+                document.getElementById(id).addEventListener('change', () => {
+                    generationPage = 0;
+                    renderGenerationRecords();
+                });
+            }
+            document.getElementById('generation-previous').addEventListener('click', () => {
+                generationPage = Math.max(0, generationPage - 1);
+                renderGenerationRecords();
+            });
+            document.getElementById('generation-next').addEventListener('click', () => {
+                generationPage++;
+                renderGenerationRecords();
+            });
+            document.getElementById('generation-export').addEventListener('click', () => {
+                const rows = [['Chat', 'Message ID', 'Model', 'Input tokens', 'Output tokens', 'Tokens/sec',
+                    'Generation seconds', 'Prompt seconds', 'Total seconds', 'Incomplete', 'Chat parameters']];
+                for (const { chat, reply, model, measurements: m } of getVisibleGenerationRecords()) {
+                    rows.push([chat.title, getMessageId(chat, reply), getAnalyticsModelLabel(model),
+                        m.inputTokens, m.outputTokens, m.speed, m.generationSeconds, m.promptSeconds, m.totalSeconds,
+                        m.incomplete, JSON.stringify(chat.chat?.params ?? {})]);
+                }
+                const csv = rows.map(row => row.map(value => {
+                    let text = value === null || value === undefined ? '' : String(value);
+                    if (typeof value === 'string' && /^[=+@\-\t\r]/.test(text)) text = "'" + text;
+                    return '"' + text.replaceAll('"', '""') + '"';
+                }).join(',')).join('\r\n');
+                downloadFile(new Blob(['\ufeff', csv], { type: 'text/csv;charset=utf-8' }), 'owchats-generation-measurements.csv');
+            });
+        }
+
+        function getVisibleGenerationRecords() {
+            const model = document.getElementById('generation-model').value;
+            const records = generationRecords.filter(record => model === 'all' || JSON.stringify(record.model) === model);
+            const sort = document.getElementById('generation-sort').value;
+            const value = record => sort === 'output' ? record.measurements.outputTokens
+                : sort === 'newest' ? Number(record.reply.timestamp) || 0 : record.measurements.speed;
+            return records.sort((a, b) => {
+                const left = value(a);
+                const right = value(b);
+                if (left === null || right === null) return (left === null) - (right === null);
+                return (sort === 'slowest' ? 1 : -1) * (left - right);
+            });
+        }
+
+        function updateGenerationRecords(chats, includeMessage) {
+            generationRecords = collectReplyRecords(chats, includeMessage);
+            generationPage = 0;
+            const select = document.getElementById('generation-model');
+            const previous = select.value;
+            select.replaceChildren(new Option('All models', 'all'));
+            const models = [...new Set(generationRecords.map(record => record.model))].sort(chatCollator.compare);
+            for (const model of models) select.add(new Option(getAnalyticsModelLabel(model), JSON.stringify(model)));
+            if ([...select.options].some(option => option.value === previous)) select.value = previous;
+            renderGenerationRecords();
+        }
+
+        function renderGenerationRecords() {
+            const records = getVisibleGenerationRecords();
+            const start = generationPage * generationPageSize;
+            const shown = records.slice(start, start + generationPageSize);
+            const rows = document.createDocumentFragment();
+            for (const { chat, reply, model, measurements: m } of shown) {
+                const row = document.createElement('tr');
+                const review = document.createElement('button');
+                review.type = 'button';
+                review.className = 'btn btn-link text-start p-0 chat-list-title d-block w-100';
+                review.textContent = chat.title || 'Untitled Chat';
+                review.addEventListener('click', () => displayMessages(chat, reply));
+                const label = row.insertCell();
+                label.className = 'generation-title-column';
+                label.append(review);
+                const date = document.createElement('div');
+                date.className = 'small text-body-secondary';
+                date.textContent = reply.timestamp ? new Date(reply.timestamp * 1000).toLocaleString() : 'Undated reply';
+                label.append(date);
+                row.insertCell().textContent = getAnalyticsModelLabel(model);
+                for (const value of [m.inputTokens, m.outputTokens, m.speed, m.generationSeconds, m.promptSeconds, m.totalSeconds]) {
+                    row.insertCell().textContent = formatMeasurement(value);
+                }
+                const detail = document.createElement('details');
+                const summary = document.createElement('summary');
+                summary.textContent = m.incomplete ? 'Partial usage / settings' : 'Usage / settings';
+                const raw = document.createElement('pre');
+                raw.className = 'small mb-0';
+                raw.style.maxWidth = '24rem';
+                raw.textContent = JSON.stringify({ usage: m.raw, chatParameters: chat.chat?.params ?? {} }, null, 2);
+                detail.append(summary, raw);
+                row.insertCell().append(detail);
+                rows.append(row);
+            }
+            document.getElementById('generation-list').replaceChildren(rows);
+            const measured = records.filter(({ measurements: m }) => m.inputTokens !== null || m.outputTokens !== null).length;
+            const timed = records.filter(({ measurements: m }) => m.speed !== null).length;
+            document.getElementById('generation-count').textContent = records.length
+                ? (start + 1) + '–' + (start + shown.length) + ' of ' + records.length + ' replies · '
+                    + measured + ' with token counts · ' + timed + ' with generation speed'
+                : 'No saved assistant replies match these filters.';
+            document.getElementById('generation-previous').disabled = generationPage === 0;
+            document.getElementById('generation-next').disabled = start + shown.length >= records.length;
+            document.getElementById('generation-export').disabled = !records.length;
         }
 
         function getAnalyticsModelLabel(model) {
@@ -1557,7 +1824,12 @@
                     numbers.format(stats.chats.size),
                     numbers.format(stats.replies),
                     stats.median === null ? '—' : numbers.format(stats.median),
-                    percentages.format(stats.sourceRate) + ' (' + numbers.format(stats.sourced) + ')'
+                    percentages.format(stats.sourceRate) + ' (' + numbers.format(stats.sourced) + ')',
+                    formatMeasurement(stats.inputTokens),
+                    formatMeasurement(stats.outputTokens),
+                    formatMeasurement(stats.medianSpeed),
+                    formatMeasurement(stats.medianGeneration),
+                    stats.usageReplies + ' / ' + stats.speeds.length + ' of ' + stats.replies
                 ];
                 for (const value of values) {
                     const cell = row.insertCell();
@@ -1567,6 +1839,169 @@
                 rows.append(row);
             }
             document.getElementById('model-analytics').replaceChildren(rows);
+        }
+
+        function collectModelSwitches(chats, includeMessage) {
+            const switches = new Map();
+            for (const chat of chats) {
+                const { nodes } = getConversationTree(chat);
+                const records = collectReplyRecords([chat]);
+                const modelByMessage = new Map(records.map(record => [record.reply, record.model]));
+                for (const node of nodes) {
+                    if (node.message.role !== 'assistant' || (includeMessage && !includeMessage(node.message))) continue;
+                    const to = modelByMessage.get(node.message);
+                    if (!to) continue;
+                    const seen = new Set([node]);
+                    let ancestor = node.parent;
+                    while (ancestor && !seen.has(ancestor) && ancestor.message.role !== 'assistant') {
+                        seen.add(ancestor);
+                        ancestor = ancestor.parent;
+                    }
+                    if (!ancestor || seen.has(ancestor)) continue;
+                    const from = modelByMessage.get(ancestor.message);
+                    if (!from || from === to) continue;
+                    let replies = 0;
+                    while (ancestor && !seen.has(ancestor)) {
+                        seen.add(ancestor);
+                        if (ancestor.message.role === 'assistant') {
+                            if (modelByMessage.get(ancestor.message) !== from) break;
+                            replies++;
+                        }
+                        ancestor = ancestor.parent;
+                    }
+                    const key = JSON.stringify([from, to]);
+                    if (!switches.has(key)) switches.set(key, { from, to, examples: [], chats: new Set(), runs: [] });
+                    const entry = switches.get(key);
+                    entry.chats.add(chat);
+                    entry.runs.push(replies);
+                    entry.examples.push({ chat, message: node.message });
+                }
+            }
+            return [...switches.values()].sort((a, b) => b.examples.length - a.examples.length
+                || chatCollator.compare(a.from, b.from) || chatCollator.compare(a.to, b.to));
+        }
+
+        function renderModelSwitching(chats, includeMessage) {
+            const switches = collectModelSwitches(chats, includeMessage);
+            const rows = document.createDocumentFragment();
+            for (const { from, to, examples, chats, runs } of switches) {
+                const row = document.createElement('tr');
+                for (const value of [from, to, examples.length, chats.size, formatMeasurement(getMedian(runs))]) {
+                    row.insertCell().textContent = value;
+                }
+                const details = document.createElement('details');
+                const summary = document.createElement('summary');
+                summary.textContent = 'View ' + examples.length + (examples.length === 1 ? ' example' : ' examples');
+                details.append(summary);
+                for (const { chat, message } of examples) {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'btn btn-link d-block text-start p-0 text-break';
+                    button.textContent = chat.title || 'Untitled Chat';
+                    button.addEventListener('click', () => displayMessages(chat, message));
+                    details.append(button);
+                }
+                row.insertCell().append(details);
+                rows.append(row);
+            }
+            document.getElementById('switching-list').replaceChildren(rows);
+            document.getElementById('switching-count').textContent = switches.length
+                ? switches.reduce((sum, group) => sum + group.examples.length, 0) + ' switches across ' + switches.length + ' model pairs'
+                : 'No model switches with recorded parent links match these filters.';
+        }
+
+        function localDateInput(date) {
+            return new Date(getActivityDay(date)).toISOString().slice(0, 10);
+        }
+
+        function initializePeriods(chats) {
+            let latest = 0;
+            for (const chat of chats) {
+                for (const message of getConversationMessages(chat)) {
+                    const date = getActivityMessageDate(message, -Infinity);
+                    if (date) latest = Math.max(latest, date.getTime());
+                }
+            }
+            const end = new Date(latest || Date.now());
+            const currentStart = new Date(end.getFullYear(), end.getMonth(), 1);
+            const previousStart = new Date(end.getFullYear(), end.getMonth() - 1, 1);
+            const previousEnd = new Date(end.getFullYear(), end.getMonth(), 0);
+            const values = [previousStart, previousEnd, currentStart, new Date(end.getFullYear(), end.getMonth() + 1, 0)];
+            ['period-a-start', 'period-a-end', 'period-b-start', 'period-b-end'].forEach((id, index) => {
+                document.getElementById(id).value = localDateInput(values[index]);
+            });
+        }
+
+        function setupPeriodControls() {
+            document.getElementById('period-form').addEventListener('submit', event => {
+                event.preventDefault();
+                const dates = ['period-a-start', 'period-a-end', 'period-b-start', 'period-b-end']
+                    .map(id => document.getElementById(id).value);
+                if (dates[0] > dates[1] || dates[2] > dates[3]) {
+                    document.getElementById('period-status').textContent = 'Each period must end on or after its start date.';
+                    return;
+                }
+                periodComparison = dates;
+                renderPeriodComparison();
+            });
+        }
+
+        function summarizePeriod(first, last) {
+            const start = Date.parse(first + 'T00:00:00Z');
+            const end = Date.parse(last + 'T00:00:00Z');
+            const includes = message => {
+                const date = getActivityMessageDate(message, -Infinity);
+                if (!date) return false;
+                const day = getActivityDay(date);
+                return day >= start && day <= end;
+            };
+            let chats = chatFilter.chats;
+            if (replyModelFilter !== null) {
+                chats = [...(collectModelAnalytics(chats, includes).get(replyModelFilter)?.chats ?? [])];
+            }
+            const active = chats.filter(chat => getConversationMessages(chat).some(includes));
+            const models = collectModelAnalytics(active, includes);
+            let userMessages = 0;
+            let assistantMessages = 0;
+            for (const chat of active) {
+                for (const message of getConversationMessages(chat)) {
+                    if (!includes(message)) continue;
+                    if (message.role === 'user') userMessages++;
+                    if (message.role === 'assistant') assistantMessages++;
+                }
+            }
+            return { chats: active.length, userMessages, assistantMessages, models };
+        }
+
+        function renderPeriodComparison() {
+            const result = document.getElementById('period-results');
+            const status = document.getElementById('period-status');
+            result.replaceChildren();
+            if (!periodComparison) {
+                status.textContent = 'Choose two date ranges, then compare.';
+                return;
+            }
+            const [aStart, aEnd, bStart, bEnd] = periodComparison;
+            const a = summarizePeriod(aStart, aEnd);
+            const b = summarizePeriod(bStart, bEnd);
+            status.textContent = 'A · ' + aStart + ' through ' + aEnd + ' · B · ' + bStart + ' through ' + bEnd;
+            const summary = [
+                ['Active chats', a.chats, b.chats, b.chats - a.chats],
+                ['User messages', a.userMessages, b.userMessages, b.userMessages - a.userMessages],
+                ['Assistant replies', a.assistantMessages, b.assistantMessages, b.assistantMessages - a.assistantMessages]
+            ];
+            appendReportTable(result, 'Activity comparison', ['Metric', 'A', 'B', 'Change'], summary);
+            const modelRows = [...new Set([...a.models.keys(), ...b.models.keys()])].sort(chatCollator.compare).map(model => {
+                const left = a.models.get(model);
+                const right = b.models.get(model);
+                return [getAnalyticsModelLabel(model), left?.replies ?? 0, right?.replies ?? 0,
+                    formatMeasurement(left?.median), formatMeasurement(right?.median),
+                    formatMeasurement(left?.outputTokens), formatMeasurement(right?.outputTokens),
+                    formatMeasurement(left?.medianSpeed), formatMeasurement(right?.medianSpeed)];
+            });
+            appendReportTable(result, 'Models by period',
+                ['Model', 'A replies', 'B replies', 'A median chars', 'B median chars', 'A output tokens', 'B output tokens', 'A tok/s', 'B tok/s'],
+                modelRows);
         }
 
         // Generate time-based chart
@@ -2364,18 +2799,20 @@
             const group = report.createElement('div');
             parent.append(group);
             const label = appendReportText(group, 'h3', title);
+            if (report === document) label.className = 'h6 mt-3';
             if (!rows.length) {
                 appendReportText(group, 'p', 'No data in this view.');
                 return;
             }
             const scroller = report.createElement('div');
-            scroller.className = 'table-scroll';
+            scroller.className = report === document ? 'table-responsive' : 'table-scroll';
             scroller.tabIndex = 0;
             scroller.setAttribute('role', 'region');
             scroller.setAttribute('aria-label', title);
             group.append(scroller);
             const table = report.createElement('table');
-            if (heatMaximum) table.className = 'report-heatmap';
+            if (report === document) table.className = 'table table-striped table-hover align-middle';
+            else if (heatMaximum) table.className = 'report-heatmap';
             label.id = 'report-table-' + report.querySelectorAll('table').length;
             table.setAttribute('aria-labelledby', label.id);
             scroller.append(table);
@@ -2391,7 +2828,7 @@
                     const cell = row.insertCell();
                     cell.textContent = numeric ? activityCountFormat.format(value) : value;
                     if (!numeric) continue;
-                    cell.classList.add('number');
+                    cell.classList.add(report === document ? 'text-end' : 'number');
                     if (bars && value > 0) {
                         cell.style.setProperty('--bar-width', value / barMaximum * 100 + '%');
                         cell.classList.add('report-bar');
@@ -2479,6 +2916,8 @@
                     tr { break-inside: avoid; }
                     .table-scroll { overflow: visible; }
                     .report-heatmap { font-size: 7pt; }
+                    table { font-size: 7.5pt; }
+                    th, td { padding: .25rem .2rem; }
                 }
             `);
 
@@ -2532,7 +2971,7 @@
             const modelRows = [...document.querySelectorAll('#model-analytics tr')]
                 .map(row => [...row.cells].map(cell => cell.textContent));
             appendReportTable(models, 'Saved assistant replies',
-                ['Model', 'Chats', 'Replies', 'Median chars', 'Replies with sources'], modelRows);
+                ['Model', 'Chats', 'Replies', 'Median chars', 'Replies with sources', 'Input tokens', 'Output tokens', 'Median tok/s', 'Median gen s', 'Usage / speed coverage'], modelRows);
 
             const details = report.createElement('section');
             report.body.append(details);
@@ -2546,6 +2985,28 @@
             appendReportTable(details, 'Top 10 referenced sources', ['Source', 'Type', 'References'],
                 referencedSources.slice(0, 10).map(({ name, type, count }) => [name, type, count]));
             appendReportTable(details, 'Top 10 tags', ['Tag', 'Chats'], tagCounts.slice(0, 10), { bars: true });
+
+            const switching = collectModelSwitches(filteredData, modelComparison.includeMessage);
+            const transitions = report.createElement('section');
+            report.body.append(transitions);
+            appendReportText(transitions, 'h2', 'Model switching');
+            appendReportTable(transitions, 'Branch transitions',
+                ['From', 'To', 'Switches', 'Chats', 'Median replies before switch'],
+                switching.map(entry => [entry.from, entry.to, entry.examples.length, entry.chats.size, formatMeasurement(getMedian(entry.runs))]));
+
+            if (periodComparison) {
+                const comparison = report.createElement('section');
+                report.body.append(comparison);
+                appendReportText(comparison, 'h2', 'Period comparison');
+                appendReportText(comparison, 'p', 'A · ' + periodComparison[0] + ' through ' + periodComparison[1]
+                    + ' · B · ' + periodComparison[2] + ' through ' + periodComparison[3]);
+                for (const table of document.querySelectorAll('#period-results table')) {
+                    const rows = [...table.tBodies[0].rows].map(row => [...row.cells].map(cell => cell.textContent));
+                    appendReportTable(comparison, table.getAttribute('aria-labelledby') === null ? 'Comparison'
+                        : document.getElementById(table.getAttribute('aria-labelledby')).textContent,
+                        [...table.tHead.rows[0].cells].map(cell => cell.textContent), rows);
+                }
+            }
 
             const date = new Date(getActivityDay(now)).toISOString().slice(0, 10);
             const html = '<!doctype html>\n' + report.documentElement.outerHTML;
@@ -2969,7 +3430,30 @@
                 selectedButton?.setAttribute('aria-pressed', 'false');
                 selectedButton = buttons.get(node);
                 selectedButton.setAttribute('aria-pressed', 'true');
-                const card = createMessageCard(node.message, chat.id || chat.chat?.id, node.id, true);
+                const card = createMessageCard(node.message, chat.id || chat.chat?.id, node.id, true, chat.chat?.history?.messages?.[node.id]);
+                const actions = document.createElement('div');
+                actions.className = 'd-flex flex-wrap gap-2 mt-2';
+                const exportButton = document.createElement('button');
+                exportButton.type = 'button';
+                exportButton.className = 'btn btn-sm btn-outline-primary';
+                exportButton.textContent = 'Export path to this message';
+                exportButton.addEventListener('click', () => exportConversationMarkdown(chat, node));
+                actions.append(exportButton);
+                const siblings = node.message.role === 'assistant'
+                    ? node.parent?.children.filter(child => child !== node && child.message.role === 'assistant') ?? [] : [];
+                if (siblings.length) {
+                    const compareButton = document.createElement('button');
+                    compareButton.type = 'button';
+                    compareButton.className = 'btn btn-sm btn-outline-secondary';
+                    compareButton.textContent = 'Compare alternate replies';
+                    compareButton.addEventListener('click', () => {
+                        const comparison = document.createElement('div');
+                        renderBranchComparison(comparison, chat, node, siblings);
+                        detail.replaceChildren(comparison, actions);
+                    });
+                    actions.append(compareButton);
+                }
+                card.append(actions);
                 if (current) {
                     const status = document.createElement('p');
                     status.className = 'small text-body-secondary mb-2';
@@ -3025,19 +3509,167 @@
             if (offset + selectedButton.offsetHeight > navigation.clientHeight) navigation.scrollTop = offset;
         }
 
+        function getConversationPath(chat, selectedNode = null) {
+            const saved = chat.chat?.messages;
+            if (!selectedNode && Array.isArray(saved) && saved.length) return saved;
+            const tree = getConversationTree(chat);
+            let node = selectedNode ?? tree.current;
+            if (!node) {
+                return Array.isArray(saved) && saved.length ? saved : tree.nodes.map(node => node.message);
+            }
+            const path = [];
+            const visited = new Set();
+            while (node && !visited.has(node)) {
+                visited.add(node);
+                path.push(node.message);
+                node = node.parent;
+            }
+            return path.reverse();
+        }
+
+        function exportConversationMarkdown(chat, selectedNode = null) {
+            const title = chat.title || 'Untitled Chat';
+            const lines = ['# ' + title.replace(/[\r\n]/g, ' '), ''];
+            const path = getConversationPath(chat, selectedNode);
+            lines.push(selectedNode ? 'Conversation path through the selected message.' : 'Saved conversation path.', '');
+            for (const message of path) {
+                const historyReply = chat.chat?.history?.messages?.[getMessageId(chat, message)];
+                const model = message.role === 'assistant' ? getReplyModel(message, historyReply) : '';
+                lines.push('## ' + getMessageRole(message) + (model ? ' · ' + model.replace(/[\r\n]/g, ' ') : ''), '');
+                if (message.timestamp) {
+                    const date = new Date(message.timestamp * 1000);
+                    if (Number.isFinite(date.getTime())) lines.push(date.toLocaleString(), '');
+                }
+                lines.push(typeof message.content === 'string' ? message.content : '', '');
+                const files = Array.isArray(message.files) ? message.files : [];
+                if (files.length) {
+                    lines.push('### Attachments', '');
+                    for (const file of files) lines.push('- ' + (file.name || file.filename || file.type || 'Attachment'));
+                    lines.push('');
+                }
+                const sources = Array.isArray(message.sources) ? message.sources : [];
+                if (sources.some(item => item?.source)) {
+                    lines.push('### Sources', '');
+                    for (const item of sources) {
+                        if (item?.source) lines.push('- ' + (item.source.name || item.source.id || 'Unknown source'));
+                    }
+                    lines.push('');
+                }
+            }
+            const filename = title.replace(/[<>:"/\\|?*\u0000-\u001f]/g, '-').trim().slice(0, 100) || 'conversation';
+            downloadFile(new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' }), filename + '.md');
+        }
+
+        function renderBranchComparison(container, chat, selected, siblings) {
+            const label = document.createElement('label');
+            label.textContent = 'Compare with';
+            label.className = 'form-label';
+            const choices = document.createElement('select');
+            choices.className = 'form-select form-select-sm mb-3';
+            label.append(choices);
+            siblings.forEach((node, index) => {
+                const model = getReplyModel(node.message) || getMessageRole(node.message);
+                choices.add(new Option(model + ' · ' + (node.message.content || '').toString().slice(0, 70), index));
+            });
+            const columns = document.createElement('div');
+            columns.className = 'branch-comparison';
+            const render = () => {
+                columns.replaceChildren();
+                for (const node of [selected, siblings[Number(choices.value)]]) {
+                    const column = document.createElement('div');
+                    const heading = document.createElement('h6');
+                    heading.textContent = getAnalyticsModelLabel(getReplyModel(node.message));
+                    const metrics = document.createElement('p');
+                    metrics.className = 'small text-body-secondary';
+                    const chars = typeof node.message.content === 'string' ? Array.from(node.message.content).length : 0;
+                    const historyReply = chat.chat?.history?.messages?.[node.id];
+                    const usage = getReplyMeasurements(node.message, historyReply);
+                    metrics.textContent = chars + ' chars · ' + formatMeasurement(usage.outputTokens)
+                        + ' output tokens · ' + formatMeasurement(usage.speed) + ' tok/s';
+                    column.append(heading, metrics, createMessageCard(node.message, chat.id || chat.chat?.id, node.id, true, historyReply));
+                    columns.append(column);
+                }
+            };
+            choices.addEventListener('change', render);
+            container.replaceChildren(label, columns);
+            render();
+        }
+
+        function setupConversationSearch(container, chat, openMessage) {
+            const form = document.createElement('form');
+            form.className = 'd-flex flex-wrap align-items-center gap-2 mb-3';
+            form.setAttribute('role', 'search');
+            const input = document.createElement('input');
+            input.type = 'search';
+            input.className = 'form-control form-control-sm w-auto';
+            input.placeholder = 'Search this conversation…';
+            input.setAttribute('aria-label', 'Search this conversation');
+            const previous = document.createElement('button');
+            previous.type = 'button';
+            previous.className = 'btn btn-sm btn-outline-secondary';
+            previous.textContent = 'Previous match';
+            const next = document.createElement('button');
+            next.type = 'submit';
+            next.className = previous.className;
+            next.textContent = 'Next match';
+            const status = document.createElement('span');
+            status.className = 'small text-body-secondary';
+            status.setAttribute('role', 'status');
+            form.append(input, previous, next, status);
+            container.append(form);
+            let matches = [];
+            let index = -1;
+            const jump = direction => {
+                if (!matches.length) return;
+                index = index < 0 ? (direction > 0 ? 0 : matches.length - 1)
+                    : (index + direction + matches.length) % matches.length;
+                const { message, start, length } = matches[index];
+                openMessage(message, { start, length });
+                status.textContent = (index + 1) + ' of ' + matches.length + ' matches across all branches';
+            };
+            input.addEventListener('input', () => {
+                const term = input.value;
+                matches = [];
+                index = -1;
+                if (term.trim()) {
+                    const expression = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'giu');
+                    for (const message of getConversationMessages(chat)) {
+                        if (typeof message.content !== 'string') continue;
+                        for (const match of message.content.matchAll(expression)) {
+                            matches.push({ message, start: match.index, length: match[0].length });
+                        }
+                    }
+                }
+                previous.disabled = next.disabled = !matches.length;
+                status.textContent = term.trim() ? matches.length + ' matches across all branches' : '';
+            });
+            form.addEventListener('submit', event => { event.preventDefault(); jump(1); });
+            previous.addEventListener('click', () => jump(-1));
+            previous.disabled = next.disabled = true;
+        }
+
         function getMessageRole(message) {
             if (message.role === 'user') return 'User';
             if (message.role === 'assistant') return 'Assistant';
             return message.role || 'Message';
         }
 
-        function createMessageCard(message, chatId, messageId, plainText = false) {
+        function createMessageCard(message, chatId, messageId, plainText = false, historyReply = null) {
             const messageDiv = document.createElement('div');
             messageDiv.className = message.role === 'user' ? 'message-user' : 'message-assistant';
             const roleSpan = document.createElement('div');
             roleSpan.className = 'fw-bold mb-1';
             roleSpan.textContent = getMessageRole(message);
             messageDiv.appendChild(roleSpan);
+            if (message.role === 'assistant') {
+                const metrics = document.createElement('div');
+                metrics.className = 'small text-body-secondary mb-2';
+                const usage = getReplyMeasurements(message, historyReply);
+                metrics.textContent = getAnalyticsModelLabel(getReplyModel(message, historyReply)) + ' · '
+                    + formatMeasurement(usage.inputTokens) + ' input tokens · ' + formatMeasurement(usage.outputTokens)
+                    + ' output tokens · ' + formatMeasurement(usage.speed) + ' tok/s';
+                messageDiv.append(metrics);
+            }
             const link = messageId && createOpenWebUILink(chatId, 'Open message in Open WebUI', messageId);
             if (link) roleSpan.append(' ', link);
 
@@ -3112,13 +3744,19 @@
             }
             
             const messages = target ? getConversationMessages(chat) : (
-                chat.chat?.messages?.length ? chat.chat.messages : getConversationMessages(chat)
+                chat.chat?.messages?.length ? [...chat.chat.messages] : getConversationMessages(chat)
             );
             if (target && !messages.includes(target)) {
                 const index = messages.findIndex(message => target.id && message.id === target.id);
                 if (index === -1) messages.push(target);
                 else messages[index] = target;
             }
+            const exportButton = document.createElement('button');
+            exportButton.type = 'button';
+            exportButton.className = 'btn btn-sm btn-outline-primary mb-3';
+            exportButton.textContent = 'Export saved path as Markdown';
+            exportButton.addEventListener('click', () => exportConversationMarkdown(chat));
+            messageContainer.append(exportButton);
             const transcript = document.createElement('div');
             const tree = document.createElement('div');
             tree.className = 'conversation-tree';
@@ -3140,6 +3778,21 @@
                 });
                 messageContainer.append(toggle);
             }
+            setupConversationSearch(messageContainer, chat, (message, match) => {
+                tree.hidden = false;
+                transcript.hidden = true;
+                const toggle = messageContainer.querySelector('[aria-controls="conversation-tree-panel"]');
+                if (toggle) toggle.setAttribute('aria-expanded', 'true');
+                tree.replaceChildren();
+                renderConversationTree(tree, chat, message);
+                const detail = tree.querySelector('[aria-label="Selected message"] .conversation-message-content');
+                if (detail && typeof message.content === 'string') {
+                    const mark = document.createElement('mark');
+                    mark.textContent = message.content.slice(match.start, match.start + match.length);
+                    detail.replaceChildren(message.content.slice(0, match.start), mark,
+                        message.content.slice(match.start + match.length));
+                }
+            });
             messageContainer.append(transcript, tree);
             let targetElement;
             
@@ -3150,7 +3803,8 @@
                 transcript.append(noMessages);
             } else {
                 messages.forEach(message => {
-                    const messageDiv = createMessageCard(message, chatId, getMessageId(chat, message));
+                    const messageId = getMessageId(chat, message);
+                    const messageDiv = createMessageCard(message, chatId, messageId, false, chat.chat?.history?.messages?.[messageId]);
                     if (message === target) {
                         targetElement = messageDiv;
                         messageDiv.classList.add('message-match');
@@ -3336,6 +3990,9 @@
             currentPage = 0;
             generateDetailCharts(filteredData, includeMessage);
             renderModelAnalytics();
+            updateGenerationRecords(filteredData, includeMessage);
+            renderModelSwitching(filteredData, includeMessage);
+            renderPeriodComparison();
             renderActivitySelection();
             renderActiveFilters();
             displayChatList();

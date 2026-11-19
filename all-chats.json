@@ -7,9 +7,13 @@
       "id": "487f8d9d-117e-4c0a-a391-000000000001",
       "title": "Weekend plan for the Maple Street tool library",
       "models": [
-        "qwen2.5:7b"
+        "qwen2.5:7b",
+        "llama3.1:8b"
       ],
-      "params": {},
+      "params": {
+        "temperature": 0.7,
+        "num_ctx": 8192
+      },
       "history": {
         "messages": {
           "487f8d9d-117e-4c0a-a391-000000000001-m1": {
@@ -54,7 +58,15 @@
                   }
                 ]
               }
-            ]
+            ],
+            "info": {
+              "prompt_eval_count": 256,
+              "eval_count": 64,
+              "prompt_eval_duration": 160000000,
+              "eval_duration": 1600000000,
+              "total_duration": 1960000000,
+              "load_duration": 200000000
+            }
           },
           "487f8d9d-117e-4c0a-a391-000000000001-m3": {
             "id": "487f8d9d-117e-4c0a-a391-000000000001-m3",
@@ -77,10 +89,18 @@
             "role": "assistant",
             "content": "Yes. Spend the first 10 minutes on safety gear, the next 10 on sign-in and returns, and the final 10 on checking benches. Ask one volunteer to handle sign-in while another does the bench check.",
             "timestamp": 1787061732,
-            "model": "qwen2.5:7b",
-            "modelName": "qwen2.5:7b",
+            "model": "llama3.1:8b",
+            "modelName": "llama3.1:8b",
             "modelIdx": 0,
-            "done": true
+            "done": true,
+            "usage": {
+              "prompt_tokens": 320,
+              "completion_tokens": 48,
+              "eval_count": 48,
+              "eval_duration": 2400000000,
+              "prompt_eval_duration": 240000000,
+              "total_duration": 2640000000
+            }
           },
           "487f8d9d-117e-4c0a-a391-000000000001-m5": {
             "id": "487f8d9d-117e-4c0a-a391-000000000001-m5",
@@ -92,7 +112,16 @@
             "model": "qwen2.5:7b",
             "modelName": "qwen2.5:7b",
             "modelIdx": 0,
-            "done": true
+            "done": true,
+            "usage": {
+              "prompt_tokens": 320,
+              "completion_tokens": 60,
+              "timings": {
+                "predicted_n": 60,
+                "predicted_ms": 1200,
+                "prompt_ms": 180
+              }
+            }
           }
         },
         "currentId": "487f8d9d-117e-4c0a-a391-000000000001-m4"
@@ -140,7 +169,15 @@
                 }
               ]
             }
-          ]
+          ],
+          "info": {
+            "prompt_eval_count": 256,
+            "eval_count": 64,
+            "prompt_eval_duration": 160000000,
+            "eval_duration": 1600000000,
+            "total_duration": 1960000000,
+            "load_duration": 200000000
+          }
         },
         {
           "id": "487f8d9d-117e-4c0a-a391-000000000001-m3",
@@ -163,10 +200,18 @@
           "role": "assistant",
           "content": "Yes. Spend the first 10 minutes on safety gear, the next 10 on sign-in and returns, and the final 10 on checking benches. Ask one volunteer to handle sign-in while another does the bench check.",
           "timestamp": 1787061732,
-          "model": "qwen2.5:7b",
-          "modelName": "qwen2.5:7b",
+          "model": "llama3.1:8b",
+          "modelName": "llama3.1:8b",
           "modelIdx": 0,
-          "done": true
+          "done": true,
+          "usage": {
+            "prompt_tokens": 320,
+            "completion_tokens": 48,
+            "eval_count": 48,
+            "eval_duration": 2400000000,
+            "prompt_eval_duration": 240000000,
+            "total_duration": 2640000000
+          }
         }
       ],
       "tags": [],
@@ -254,7 +299,12 @@
                   }
                 ]
               }
-            ]
+            ],
+            "usage": {
+              "prompt_tokens": 180,
+              "completion_tokens": 52,
+              "total_tokens": 232
+            }
           }
         },
         "currentId": "487f8d9d-117e-4c0a-a391-000000000002-m2"
@@ -315,7 +365,12 @@
                 }
               ]
             }
-          ]
+          ],
+          "usage": {
+            "prompt_tokens": 180,
+            "completion_tokens": 52,
+            "total_tokens": 232
+          }
         }
       ],
       "tags": [],
@@ -754,7 +809,12 @@
                   }
                 ]
               }
-            ]
+            ],
+            "usage": {
+              "prompt_tokens": 180,
+              "completion_tokens": 52,
+              "total_tokens": 232
+            }
           }
         },
         "currentId": "487f8d9d-117e-4c0a-a391-000000000006-m2"
@@ -815,7 +875,12 @@
                 }
               ]
             }
-          ]
+          ],
+          "usage": {
+            "prompt_tokens": 180,
+            "completion_tokens": 52,
+            "total_tokens": 232
+          }
         }
       ],
       "tags": [],
