@@ -379,6 +379,19 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+        .open-webui-link {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+        .open-webui-link img {
+            width: 1.25rem;
+            height: 1.25rem;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
         .open-webui-link[hidden] {
             display: none !important;
         }
@@ -506,7 +519,7 @@
                 <img src="public/assets/analyzer-logo.png" width="44" height="44" alt="">
                 <div>
                     <h1 class="mb-0">OWChats</h1>
-                    <p class="mb-0 small fst-italic text-body-secondary">OpenWebUI Chat Analyzer</p>
+                    <p class="mb-0 small fst-italic text-body-secondary">Open WebUI Chat Analyzer</p>
                 </div>
             </div>
             <div class="d-flex flex-wrap align-items-center gap-2">
@@ -550,7 +563,7 @@
                             <div>
                                 <i class="bi bi-upload fs-3"></i>
                                 <h5>Drag & drop your JSON file here or click to browse</h5>
-                                <p class="text-muted">Upload your OpenWebUI chats export file</p>
+                                <p class="text-muted">Upload your chat export from Open WebUI</p>
                             </div>
                             <input type="file" id="json-file" accept=".json" style="display: none;">
                         </label>
@@ -1120,6 +1133,11 @@
         document.addEventListener('DOMContentLoaded', async () => {
             setupTheme();
             setupOpenWebUISettings();
+            new bootstrap.Tooltip(document.body, {
+                selector: '.open-webui-link',
+                trigger: 'hover focus',
+                container: 'body'
+            });
             setupChatListControls();
             document.getElementById('export-report').addEventListener('click', exportAnalysisReport);
             setupModelAnalytics();
@@ -1148,6 +1166,7 @@
         function setupOpenWebUISettings() {
             const input = document.getElementById('open-webui-url');
             const status = document.getElementById('open-webui-status');
+            styleOpenWebUILink(document.querySelector('#open-webui-export-shortcut a'), 'View Open WebUI export settings');
             try {
                 openWebUIBase = normalizeOpenWebUIBase(localStorage.getItem(openWebUIStorageKey) ?? '');
             } catch {
@@ -1191,13 +1210,25 @@
             }
         }
 
+        function styleOpenWebUILink(link, label) {
+            link.className = 'open-webui-link btn btn-sm btn-outline-secondary';
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.setAttribute('aria-label', label + ' (opens in a new tab)');
+            link.title = label + ' (opens in a new tab)';
+            const icon = document.createElement('img');
+            icon.src = 'public/assets/open-webui-icon.png';
+            icon.width = icon.height = 20;
+            icon.alt = '';
+            const name = document.createElement('span');
+            name.textContent = 'Open WebUI';
+            link.replaceChildren(icon, name);
+        }
+
         function createOpenWebUILink(chatId, label, messageId) {
             if (typeof chatId !== 'string' || !chatId.trim() || chatId === '.' || chatId === '..') return null;
             const link = document.createElement('a');
-            link.className = 'open-webui-link small';
-            link.textContent = label;
-            link.target = '_blank';
-            link.rel = 'noopener noreferrer';
+            styleOpenWebUILink(link, label);
             openWebUILinkTargets.set(link, { chatId, messageId });
             updateOpenWebUILink(link);
             return link;
@@ -1208,6 +1239,7 @@
             if (!target) return;
             link.hidden = !openWebUIBase;
             if (!openWebUIBase) {
+                bootstrap.Tooltip.getInstance(link)?.hide();
                 link.removeAttribute('href');
                 return;
             }
@@ -2454,7 +2486,7 @@
                     button.addEventListener('click', () => displayMessages(chat, message, () => displaySourceCitations(source)));
                     group.append(button);
                     const messageId = getMessageId(chat, message);
-                    const link = messageId && createOpenWebUILink(chat.id || chat.chat?.id, 'Open message in Open WebUI', messageId);
+                    const link = messageId && createOpenWebUILink(chat.id || chat.chat?.id, 'View message in Open WebUI', messageId);
                     if (link) {
                         link.classList.add('me-2');
                         group.append(link);
@@ -2487,7 +2519,7 @@
                 details.append(openChat);
             }
             if (source.type === 'chat') {
-                const link = createOpenWebUILink(source.id, 'Open in Open WebUI');
+                const link = createOpenWebUILink(source.id, 'View chat in Open WebUI');
                 if (link) {
                     link.classList.add('ms-2');
                     details.append(link);
@@ -3115,9 +3147,9 @@
                 if (matches.has(chat)) appendMessageMatch(row.cells[1], chat, matches.get(chat));
                 row.querySelector('.view-chat').addEventListener('click', () => displayChatDetails(chat));
                 row.querySelector('.view-messages').addEventListener('click', () => displayMessages(chat));
-                const link = createOpenWebUILink(chat.id || chat.chat?.id, 'Open in Open WebUI');
+                const link = createOpenWebUILink(chat.id || chat.chat?.id, 'View chat in Open WebUI');
                 if (link) {
-                    link.classList.add('d-block', 'mt-1');
+                    link.classList.add('mt-1');
                     row.lastElementChild.append(link);
                 }
                 chatList.appendChild(row);
@@ -3670,7 +3702,7 @@
                     + ' output tokens · ' + formatMeasurement(usage.speed) + ' tok/s';
                 messageDiv.append(metrics);
             }
-            const link = messageId && createOpenWebUILink(chatId, 'Open message in Open WebUI', messageId);
+            const link = messageId && createOpenWebUILink(chatId, 'View message in Open WebUI', messageId);
             if (link) roleSpan.append(' ', link);
 
             const contentDiv = document.createElement('div');
@@ -3737,9 +3769,9 @@
             title.textContent = chat.title || 'Untitled Chat';
             messageContainer.appendChild(title);
             const chatId = chat.id || chat.chat?.id;
-            const chatLink = createOpenWebUILink(chatId, 'Open chat in Open WebUI');
+            const chatLink = createOpenWebUILink(chatId, 'View chat in Open WebUI');
             if (chatLink) {
-                chatLink.classList.add('d-inline-block', 'mb-3');
+                chatLink.classList.add('me-2', 'mb-3');
                 messageContainer.append(chatLink);
             }
             
