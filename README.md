@@ -1,10 +1,10 @@
 # OWChats
 
-_OpenWebUI Chat Analyzer_
+_Open WebUI Chat Analyzer_
 
 ## Overview
 
-This is a simple tool to analyze chats from OpenWebUI. It provides a user-friendly interface to visualize and understand chat data.
+This is a simple tool to analyze chats from Open WebUI. It provides a user-friendly interface to visualize and understand chat data.
 
 # ➣ [Click here to use the online version](https://dziban303.github.io/owchats/chat-analyzer.html)
 
@@ -22,12 +22,12 @@ The sample loads when the analyzer is served over HTTP, including on GitHub Page
 - In the **Chat List**, open **Messages** for **Weekend plan for the Maple Street tool library**, then select **Conversation tree** to compare the two replies to its final prompt.
 - The weekend-planning chat also includes a model switch and synthetic usage measurements for trying **Generation Statistics**. These example measurements are illustrative.
 
-## Downloading chats from OpenWebUI
+## Downloading chats from Open WebUI
 
 To open exported chats on your own instance, expand **Open WebUI links** and save your instance’s base URL, such as `https://chat.example.com`. The analyzer remembers it in your browser and shows links in the Chat List, conversation viewer, and Sources views. Message links use the message ID to jump to the corresponding turn on Open WebUI versions that support it.
 
-1. Open your OpenWebUI instance.
-2. Go to "Admin Panel" > "Settings" tab. (If you're running OpenWebUI on the same computer, try http://localhost:3000/?settings=admin:db)
+1. Open your Open WebUI instance.
+2. Go to "Admin Panel" > "Settings" tab. (If you're running Open WebUI on the same computer, try http://localhost:3000/?settings=admin:db)
 3. Select the option "Export all chats".
 
 This will download a file named `all-chats-export-<id>.json` to your computer.
@@ -87,7 +87,7 @@ In **Messages**, search includes alternate branches. Select a reply in **Convers
 
 ## JSON File Structure
 
-Each chat in the OpenWebUI export JSON file follows this structure:
+Each chat in the Open WebUI export JSON file follows this structure:
 
 ```json
 {
