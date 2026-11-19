@@ -463,6 +463,7 @@
         }
         .branch-comparison > div { min-width: 0; overflow-wrap: anywhere; }
         .branch-comparison pre { max-width: 100%; overflow: auto; }
+        .reply-settings-comparison { table-layout: fixed; overflow-wrap: anywhere; }
         @media (max-width: 767.98px) {
             .branch-comparison { grid-template-columns: minmax(0, 1fr); }
         }
@@ -3592,38 +3593,123 @@
             downloadFile(new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' }), filename + '.md');
         }
 
+        function getRecordedReplySettings(reply, historyReply) {
+            const settings = new Map();
+            for (const message of [reply, historyReply]) {
+                if (!message) continue;
+                for (const record of [message.generation_settings, message.usage?.generation_settings,
+                    message.info?.usage?.generation_settings, message.info?.generation_settings, message.params]) {
+                    if (!record || typeof record !== 'object' || Array.isArray(record)) continue;
+                    for (const [key, value] of Object.entries(record)) {
+                        if (!settings.has(key)) settings.set(key, value);
+                    }
+                }
+            }
+            return settings;
+        }
+
         function renderBranchComparison(container, chat, selected, siblings) {
             const label = document.createElement('label');
             label.textContent = 'Compare with';
-            label.className = 'form-label';
+            label.className = 'form-label d-block';
             const choices = document.createElement('select');
             choices.className = 'form-select form-select-sm mb-3';
             label.append(choices);
+            const history = chat.chat?.history?.messages;
             siblings.forEach((node, index) => {
-                const model = getReplyModel(node.message) || getMessageRole(node.message);
+                const model = getReplyModel(node.message, history?.[node.id]) || getMessageRole(node.message);
                 choices.add(new Option(model + ' · ' + (node.message.content || '').toString().slice(0, 70), index));
             });
+
+            const table = document.createElement('table');
+            table.className = 'table table-sm align-top small reply-settings-comparison';
+            table.setAttribute('aria-label', 'Reply measurements and settings');
+            const header = table.createTHead().insertRow();
+            for (const text of ['Measurement or setting', 'Selected reply', 'Alternate reply']) {
+                const cell = document.createElement('th');
+                cell.scope = 'col';
+                cell.textContent = text;
+                header.append(cell);
+            }
+            const measurements = table.createTBody();
+            const settings = table.createTBody();
+            const appendRow = (body, name, values, different = false) => {
+                const row = body.insertRow();
+                if (different) row.classList.add('table-warning');
+                const heading = document.createElement('th');
+                heading.scope = 'row';
+                heading.textContent = name;
+                row.append(heading);
+                for (const value of values) row.insertCell().textContent = value;
+            };
+            const context = document.createElement('p');
+            context.className = 'small text-body-secondary mb-2';
+            context.textContent = '— indicates a missing measurement or setting. Highlighted settings have different recorded values.';
+            const chatParams = chat.chat?.params;
+            const saved = document.createElement('details');
+            saved.className = 'small mb-3';
+            if (chatParams && Object.keys(chatParams).length) {
+                const summary = document.createElement('summary');
+                summary.textContent = 'Saved chat settings';
+                const note = document.createElement('p');
+                note.className = 'text-body-secondary mb-1';
+                note.textContent = 'These settings describe the chat at export time. Settings used for earlier replies may differ.';
+                const params = document.createElement('pre');
+                params.textContent = JSON.stringify(chatParams, null, 2);
+                saved.append(summary, note, params);
+            } else {
+                saved.hidden = true;
+            }
             const columns = document.createElement('div');
             columns.className = 'branch-comparison';
             const render = () => {
+                measurements.replaceChildren();
+                settings.replaceChildren();
                 columns.replaceChildren();
-                for (const node of [selected, siblings[Number(choices.value)]]) {
+                const replies = [selected, siblings[Number(choices.value)]].map(node => {
+                    const historyReply = history?.[node.id];
+                    return {
+                        node, historyReply,
+                        usage: getReplyMeasurements(node.message, historyReply),
+                        settings: getRecordedReplySettings(node.message, historyReply)
+                    };
+                });
+                for (const [name, field] of [
+                    ['Input tokens', 'inputTokens'], ['Output tokens', 'outputTokens'], ['Generation speed (tok/s)', 'speed'],
+                    ['Prompt processing (s)', 'promptSeconds'], ['Generation (s)', 'generationSeconds'],
+                    ['Total time (s)', 'totalSeconds']
+                ]) {
+                    appendRow(measurements, name, replies.map(({ usage }) => formatMeasurement(usage[field])));
+                }
+                appendRow(measurements, 'Reply length (characters)', replies.map(({ node }) =>
+                    typeof node.message.content === 'string' ? formatMeasurement(Array.from(node.message.content).length) : '—'));
+                const heading = document.createElement('th');
+                heading.scope = 'rowgroup';
+                heading.colSpan = 3;
+                heading.textContent = 'Recorded reply settings';
+                settings.insertRow().append(heading);
+                const keys = [...new Set(replies.flatMap(reply => [...reply.settings.keys()]))].sort(chatCollator.compare);
+                if (!keys.length) appendRow(settings, 'Settings availability', ['Unknown', 'Unknown']);
+                for (const key of keys) {
+                    const values = replies.map(reply => reply.settings.has(key)
+                        ? JSON.stringify(reply.settings.get(key), (_, value) => {
+                            if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
+                            return Object.fromEntries(Object.keys(value).sort().map(key => [key, value[key]]));
+                        }) : null);
+                    const different = values.every(value => value !== null) && values[0] !== values[1];
+                    appendRow(settings, different ? key + ' (differs)' : key, values.map(value => value ?? '—'), different);
+                }
+                replies.forEach(({ node, historyReply }, index) => {
                     const column = document.createElement('div');
                     const heading = document.createElement('h6');
-                    heading.textContent = getAnalyticsModelLabel(getReplyModel(node.message));
-                    const metrics = document.createElement('p');
-                    metrics.className = 'small text-body-secondary';
-                    const chars = typeof node.message.content === 'string' ? Array.from(node.message.content).length : 0;
-                    const historyReply = chat.chat?.history?.messages?.[node.id];
-                    const usage = getReplyMeasurements(node.message, historyReply);
-                    metrics.textContent = chars + ' chars · ' + formatMeasurement(usage.outputTokens)
-                        + ' output tokens · ' + formatMeasurement(usage.speed) + ' tok/s';
-                    column.append(heading, metrics, createMessageCard(node.message, chat.id || chat.chat?.id, node.id, true, historyReply));
+                    const side = index === 0 ? 'Selected reply' : 'Alternate reply';
+                    heading.textContent = side + ' · ' + getAnalyticsModelLabel(getReplyModel(node.message, historyReply));
+                    column.append(heading, createMessageCard(node.message, chat.id || chat.chat?.id, node.id, true, historyReply));
                     columns.append(column);
-                }
+                });
             };
             choices.addEventListener('change', render);
-            container.replaceChildren(label, columns);
+            container.replaceChildren(label, context, table, saved, columns);
             render();
         }
 

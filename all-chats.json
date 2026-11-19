@@ -100,6 +100,11 @@
               "eval_duration": 2400000000,
               "prompt_eval_duration": 240000000,
               "total_duration": 2640000000
+            },
+            "params": {
+              "temperature": 0.4,
+              "num_ctx": 8192,
+              "top_p": 0.9
             }
           },
           "487f8d9d-117e-4c0a-a391-000000000001-m5": {
@@ -120,6 +125,11 @@
                 "predicted_n": 60,
                 "predicted_ms": 1200,
                 "prompt_ms": 180
+              },
+              "generation_settings": {
+                "temperature": 0.7,
+                "n_ctx": 4096,
+                "top_p": 0.9
               }
             }
           }

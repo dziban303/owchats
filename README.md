@@ -61,7 +61,7 @@ Choose **Export analysis report** in **Data Overview** to download a standalone 
 
 The analyzer reads OpenAI-compatible token counts from saved `usage` and `info` objects. Ollama generation, prompt, load, and total durations are converted from nanoseconds. Saved llama.cpp `timings` use milliseconds. Generation speed uses output tokens and generation time, or an explicitly recorded token rate. Missing values display as **—**, and incomplete usage is excluded from speed summaries. The saved chat parameters describe the export's chat settings and may differ from the settings used for older replies. [Ollama usage documentation](https://docs.ollama.com/api/usage), [llama.cpp timing fields](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/server-common.cpp)
 
-In **Messages**, search includes alternate branches. Select a reply in **Conversation tree** to compare it with a sibling reply or export the path through that message. **Export saved path as Markdown** downloads the conversation's saved transcript.
+In **Messages**, search includes alternate branches. Select a reply in **Conversation tree** to compare it with a sibling reply or export the path through that message. The comparison aligns token counts, timings, and recorded reply settings. Saved chat settings appear separately as context. **Export saved path as Markdown** downloads the conversation's saved transcript.
 
 ## Screenshots
 
